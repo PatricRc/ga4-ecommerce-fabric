@@ -48,6 +48,10 @@ nb_bronze_ga4.ipynb   (Fabric Python 3.12, deltalake)
                dbo.dim_ga4_page_type
         │
         ▼
+nb_gold_ga4_dim_date.ipynb
+  dbo.dim_ga4_date
+        │
+        ▼
 Direct Lake model + 4-page Power BI report  (not started)
 ```
 
@@ -67,6 +71,7 @@ Verified after the Fabric gold runs, for `ingest_date=2026-11-12`. Schema `dbo` 
 | `gold_ga4_items_daily` | date × item | 45,194 rows, 22,720 units |
 | `gold_ga4_landing_pages` | date × landing URL | 16,419 rows, with revenue per session |
 | `dim_ga4_page_type` | page path | 2,446 paths labelled home, category, product, cart, checkout, search, account, or other |
+| `dim_ga4_date` | one row per day | 92 days |
 
 `gold_ga4_page_sessions` is left unchanged by the marketing notebook; landing-page revenue lives in `gold_ga4_landing_pages`.
 
@@ -126,7 +131,7 @@ Microsoft Fabric (Lakehouse, Notebooks, OneLake) · Delta Lake (`deltalake`) · 
 
    Targets the **GA4-Report** workspace and **GA4Lakehouse** lakehouse. IDs can also come from `FABRIC_WORKSPACE_ID` and `FABRIC_LAKEHOUSE_ID` in `.env`.
 
-4. In Fabric, import the notebooks under `notebooks/` into **GA4-Report**, attach **GA4Lakehouse** (Add data items → From OneLake catalog), set the kernel to **Python 3.12**, and Run all in this order: `nb_bronze_ga4` → `nb_gold_ga4_page_sessions` → `nb_gold_ga4_marketing`. Each notebook must print `PASS`.
+4. In Fabric, import the notebooks under `notebooks/` into **GA4-Report**, attach **GA4Lakehouse** (Add data items → From OneLake catalog), set the kernel to **Python 3.12**, and Run all in this order: `nb_bronze_ga4` → `nb_gold_ga4_page_sessions` → `nb_gold_ga4_marketing` → `nb_gold_ga4_dim_date`. Each notebook must print `PASS`.
 
 Bronze looks for `Files/raw/ga4/ingest_date=2026-11-12/events/`. Change `INGEST_DATE` in the notebook if you export on another day.
 
