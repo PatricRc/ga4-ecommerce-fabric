@@ -1,0 +1,17 @@
+.DS_Store
+._*
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+.env.*
+!.env.example
+*.env
+secrets*
+*.parquet
+local_test/
+data/
+.venv/
+venv/
+*.log
+staging/
