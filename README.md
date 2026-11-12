@@ -4,7 +4,7 @@ A Microsoft Fabric portfolio project: the public BigQuery [GA4 obfuscated sample
 
 **Guiding question:** *Which channels, landing pages and products drive revenue for the Google Merchandise Store?*
 
-> **Status: Bronze + gold tables ready.** The Direct Lake semantic model and the four report pages are not built yet.
+> **Status: Bronze + gold tables ready. Semantic model notebook ready.** Import `nb_semantic_model_ga4.ipynb` into Fabric and run it after `nb_gold_ga4_dim_date`. The four report pages are not built yet.
 
 ## The story in four pages
 
@@ -52,7 +52,13 @@ nb_gold_ga4_dim_date.ipynb
   dbo.dim_ga4_date
         │
         ▼
-Direct Lake model + 4-page Power BI report  (not started)
+nb_semantic_model_ga4.ipynb   (Fabric Python 3.12, semantic-link / sempy_labs)
+  dbo.dim_ga4_channel
+  dbo.dim_ga4_device
+  Direct Lake model **GA4 Ecommerce**
+        │
+        ▼
+4-page Power BI report  (not started)
 ```
 
 Python notebooks write Delta through the OneLake `abfss://` endpoint with a storage bearer token (the FUSE mount cannot do the atomic rename Delta needs). Workspace and lakehouse IDs are taken from the attached default lakehouse at runtime — they are not hardcoded.
@@ -72,6 +78,8 @@ Verified after the Fabric gold runs, for `ingest_date=2026-11-12`. Schema `dbo` 
 | `gold_ga4_landing_pages` | date × landing URL | 16,419 rows, with revenue per session |
 | `dim_ga4_page_type` | page path | 2,446 paths labelled home, category, product, cart, checkout, search, account, or other |
 | `dim_ga4_date` | one row per day | 92 days |
+| `dim_ga4_channel` | one channel group | distinct `channel_group` from the session-grained facts; written by `nb_semantic_model_ga4` |
+| `dim_ga4_device` | one device category | distinct `device_category` from the session-grained facts; written by `nb_semantic_model_ga4` |
 
 `gold_ga4_page_sessions` is left unchanged by the marketing notebook; landing-page revenue lives in `gold_ga4_landing_pages`.
 
@@ -80,6 +88,51 @@ Verified after the Fabric gold runs, for `ingest_date=2026-11-12`. Schema `dbo` 
 ![Page-session gold output](docs/img/gold_output.webp)
 
 ![Marketing gold validation](docs/img/marketing_output.png)
+
+## Semantic model
+
+`nb_semantic_model_ga4.ipynb` creates the Direct Lake on OneLake model **GA4 Ecommerce** (Python 3.12, not Spark). It writes the two conformed dims, rebuilds `dim_ga4_page_type` only when a fact path is missing, then generates the model with `overwrite=False`. If a model with that exact name already exists, generation is skipped and relationships and measures are updated in place via TOM. `bronze_ga4_events` is not in the model. No report is created.
+
+All relationships are single-direction, many-to-one from the fact to the dimension. `Date[date]` is the marked date table. `month_name` is sorted by `month_num` and `day_name` by `day_of_week_num`.
+
+```mermaid
+flowchart LR
+  Date["Date"] --> Sessions
+  Date --> DailyKPIs["Daily KPIs"]
+  Date --> Funnel["Funnel Daily"]
+  Date --> Items["Items Daily"]
+  Date --> Landing["Landing Pages"]
+  Date --> PageSess["Page Sessions"]
+  Channel --> Sessions
+  Channel --> DailyKPIs
+  Channel --> Funnel
+  Device --> Sessions
+  Device --> DailyKPIs
+  Device --> Funnel
+  PageType["Page Type"] --> Sessions
+  PageType --> Landing
+  PageType --> PageSess
+```
+
+| From (many) | Column | To (one) | Column |
+|---|---|---|---|
+| Sessions, Daily KPIs, Funnel Daily, Landing Pages | `session_date` | Date | `date` |
+| Items Daily, Page Sessions | `event_date` | Date | `date` |
+| Sessions, Daily KPIs, Funnel Daily | `channel_group` | Channel | `channel_group` |
+| Sessions, Daily KPIs, Funnel Daily | `device_category` | Device | `device_category` |
+| Sessions, Landing Pages | `landing_page_path` | Page Type | `page_path` |
+| Page Sessions | `page_path` | Page Type | `page_path` |
+
+Base measures live on a calculated `_Measures` table and are computed with `DIVIDE` from sums or distinct counts — never by averaging a pre-computed rate column. Users is `DISTINCTCOUNT` of `user_pseudo_id` on Sessions. Display folders follow the four report pages.
+
+| Folder | Measures |
+|---|---|
+| Pages\01 Overview | Sessions, Users, New Users, Engaged Sessions, Engagement Rate, Purchases, Revenue, Conversion Rate, AOV, Revenue per Session, Revenue Share of Top Channel, Pageviews |
+| Pages\02 Acquisition | Sessions, Users, New Users, Engaged Sessions, Engagement Rate, Purchases, Revenue, Conversion Rate, AOV, Revenue per Session, Revenue Share of Top Channel |
+| Pages\03 Content | Sessions, Users, Engaged Sessions, Engagement Rate, Pageviews, Revenue, Conversion Rate, Revenue per Session |
+| Pages\04 Funnel & Products | View Item / Add to Cart / Begin Checkout / Add Payment Info / Purchase Sessions, the step-to-step rates, View Item to Purchase Rate, Item Views, Add to Carts, Item Revenue, Add-to-Cart Rate, plus Purchases, Revenue, Conversion Rate |
+
+After a full refresh the notebook runs a DAX query and checks these verified gold totals: Sessions = 360,129, Revenue = 362,165, Pageviews = 1,350,428. It prints PASS or FAIL.
 
 ## Data notes
 
@@ -94,7 +147,7 @@ Verified after the Fabric gold runs, for `ingest_date=2026-11-12`. Schema `dbo` 
 
 ```
 scripts/         export_ga4.py (BigQuery Storage Read API) and upload.py (OneLake)
-notebooks/       Fabric Python 3.12 bronze and gold notebooks (outputs cleared)
+notebooks/       Fabric Python 3.12 bronze, gold, and semantic model notebooks (outputs cleared)
 docs/img/        lakehouse and notebook screenshots
 requirements.txt local script dependencies
 .env.example     placeholder IDs only — real values stay local
@@ -102,7 +155,7 @@ requirements.txt local script dependencies
 
 ## Tech
 
-Microsoft Fabric (Lakehouse, Notebooks, OneLake) · Delta Lake (`deltalake`) · DuckDB · Python 3.12 · PyArrow · BigQuery Storage Read API · Azure Identity · (next) Direct Lake + Power BI
+Microsoft Fabric (Lakehouse, Notebooks, OneLake, Direct Lake) · Delta Lake (`deltalake`) · DuckDB · Python 3.12 · PyArrow · Semantic Link (`sempy_labs`) · BigQuery Storage Read API · Azure Identity · (next) Power BI report
 
 ## How to run
 
@@ -131,7 +184,7 @@ Microsoft Fabric (Lakehouse, Notebooks, OneLake) · Delta Lake (`deltalake`) · 
 
    Targets the **GA4-Report** workspace and **GA4Lakehouse** lakehouse. IDs can also come from `FABRIC_WORKSPACE_ID` and `FABRIC_LAKEHOUSE_ID` in `.env`.
 
-4. In Fabric, import the notebooks under `notebooks/` into **GA4-Report**, attach **GA4Lakehouse** (Add data items → From OneLake catalog), set the kernel to **Python 3.12**, and Run all in this order: `nb_bronze_ga4` → `nb_gold_ga4_page_sessions` → `nb_gold_ga4_marketing` → `nb_gold_ga4_dim_date`. Each notebook must print `PASS`.
+4. In Fabric, import the notebooks under `notebooks/` into **GA4-Report**, attach **GA4Lakehouse** (Add data items → From OneLake catalog), set the kernel to **Python 3.12**, and Run all in this order: `nb_bronze_ga4` → `nb_gold_ga4_page_sessions` → `nb_gold_ga4_marketing` → `nb_gold_ga4_dim_date` → `nb_semantic_model_ga4`. Each gold notebook must print `PASS`. The semantic model notebook needs XMLA read/write on the capacity and must print `OVERALL: PASS` for the Sessions / Revenue / Pageviews check.
 
 Bronze looks for `Files/raw/ga4/ingest_date=2026-11-12/events/`. Change `INGEST_DATE` in the notebook if you export on another day.
 
