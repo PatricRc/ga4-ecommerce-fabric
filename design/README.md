@@ -16,6 +16,10 @@ Open http://localhost:4173/. Individual pages are in `pages/`, the design librar
 
 For a plain static copy, run `npm run build`, then serve `dist/` with any HTTP server. For example, `python3 -m http.server 4174 --directory dist`. The HTML uses ES modules and a JSON fixture, so opening `file://` directly is not supported. Runtime icons, fonts and Chart.js are bundled locally; the preview does not need third-party CDNs or API credentials.
 
+## Generated artwork
+
+Three transparent PNG illustrations made with OpenAI Image Gen are in `assets/generated/`: ecommerce cover, acquisition storefront, and shopping journey. Open `assets/generated/gallery.html` for previews and downloads, or insert the PNGs directly into Power BI. The cover illustration also appears on the HTML welcome page.
+
 ## Deliverables
 
 | Path | Purpose |

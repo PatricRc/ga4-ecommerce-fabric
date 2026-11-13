@@ -1,0 +1,44 @@
+{
+  "collection": "GA4 Ecommerce \u2014 generated artwork",
+  "palette": [
+    "#6550D9",
+    "#423293",
+    "lavender",
+    "white"
+  ],
+  "assets": [
+    {
+      "file": "ecommerce-cover.png",
+      "name": "Ecommerce cover",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA",
+      "transparent": true,
+      "generator": "OpenAI Image Gen",
+      "purpose": "Decorative illustration; no quantitative information",
+      "recommendedPlacement": "Welcome page, right of title: 450 \u00d7 300 px"
+    },
+    {
+      "file": "acquisition-storefront.png",
+      "name": "Acquisition storefront",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "transparent": true,
+      "generator": "OpenAI Image Gen",
+      "purpose": "Decorative illustration; no quantitative information",
+      "recommendedPlacement": "Acquisition section opener or tooltip: 180 \u00d7 180 px"
+    },
+    {
+      "file": "shopping-journey.png",
+      "name": "Shopping journey",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "transparent": true,
+      "generator": "OpenAI Image Gen",
+      "purpose": "Decorative illustration; no quantitative information",
+      "recommendedPlacement": "Funnel & products section opener or tooltip: 180 \u00d7 180 px"
+    }
+  ]
+}

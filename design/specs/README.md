@@ -6,7 +6,7 @@ This is the design stage, before building the Power BI report. The new files do 
 
 The supplied references define the lavender canvas, white cards, violet chart palette, compact navigation, KPI strip, fine chart grids, and restrained semantic deltas. The design deliberately adapts those patterns to GA4 rather than recreating sales/profit/CLV measures absent from the model. Each analytical page has a different question and composition. The welcome page follows the opening-page convention documented in the prior NVIDIA design chat and Trading Analytics portfolio project.
 
-HTML uses locally bundled DM Sans; Power BI uses Segoe UI because custom web fonts are not portable in native report visuals. Bootstrap Icons supply the standard navigation and UI assets. No photographic, product-image, avatar, map, or decorative artwork is needed for this scope; there are no image placeholders.
+HTML uses locally bundled DM Sans; Power BI uses Segoe UI because custom web fonts are not portable in native report visuals. Bootstrap Icons supply the standard navigation and UI assets. Three decorative illustrations were subsequently created with OpenAI Image Gen and saved in assets/generated/; the welcome page uses the cover illustration. These are unbranded artwork, not real product thumbnails. There are no image placeholders.
 
 ## Pages
 

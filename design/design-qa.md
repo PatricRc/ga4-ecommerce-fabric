@@ -69,3 +69,7 @@ Source pixel dimensions and density normalization cannot be verified from those 
 - [x] Static build and source-linked implementation guide.
 - [ ] Formal side-by-side source-image fidelity signoff.
 - [ ] Native Power BI implementation, model checks and publication (next stage).
+
+## Image Gen artwork follow-up
+
+The user requested native Image Gen artwork after the initial handoff. Three transparent PNGs were generated and inspected: assets/generated/ecommerce-cover.png (1536 × 1024), acquisition-storefront.png and shopping-journey.png (each 1254 × 1254). All have RGBA alpha with fully transparent pixels. A standalone gallery and Power BI insertion guide accompany the originals. The welcome page now displays the generated cover illustration. This supersedes the earlier statement that custom raster artwork was not needed. Asset provenance and dimensions are in assets/generated/manifest.json.
