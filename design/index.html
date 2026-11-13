@@ -1,0 +1,1003 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From Click to Checkout · GA4 Marketing Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F4FA; --card:#FFFFFF; --ink:#1A1840; --sub:#5E6189; --muted:#9A9DC0; --line:#ECEDF6; --line2:#F3F4FA;
+  --acc:#5B5BD6; --acc-d:#4338CA; --acc2:#8B8CF0; --acc3:#C7C8F7; --soft:#EEEFFD;
+  --good:#0E9F6E; --bad:#E5484D; --warn:#F59E0B; --navy1:#1B1946; --navy2:#0F0D2E;
+  --r:16px; --shadow:0 1px 2px rgba(26,24,64,.04),0 8px 24px rgba(26,24,64,.05);
+  --rail:200px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#DCDEF2;font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#canvas{width:1280px;height:720px;background:var(--bg);position:relative;transform-origin:center center;border-radius:8px;overflow:hidden;box-shadow:0 24px 70px rgba(26,24,64,.20)}
+#canvas.collapsed{--rail:68px}
+/* ---------- rail ---------- */
+.rail{position:absolute;left:0;top:0;bottom:0;width:var(--rail);background:linear-gradient(180deg,var(--navy1) 0%,var(--navy2) 100%);color:#fff;padding:22px 14px 16px;display:flex;flex-direction:column;transition:width .25s ease;overflow:hidden;z-index:20}
+.rail::after{content:'';position:absolute;left:-60px;bottom:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(91,91,214,.35),transparent 65%);pointer-events:none}
+.brand{display:flex;gap:11px;align-items:center;padding:0 4px;min-height:38px}
+.logo{width:36px;height:36px;flex:none;border-radius:10px;background:linear-gradient(135deg,var(--acc),#7C7DF0);display:grid;place-items:center;font-weight:800;font-size:12.5px;box-shadow:0 6px 16px rgba(91,91,214,.4)}
+.brand b{font-size:13.5px;display:block;line-height:1.2;white-space:nowrap}.brand small{font-size:10px;color:rgba(255,255,255,.55);white-space:nowrap}
+.sec{font-size:9.5px;font-weight:700;letter-spacing:.16em;color:rgba(255,255,255,.42);margin:28px 0 10px 8px;white-space:nowrap}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button,.sup button{all:unset;cursor:pointer;position:relative;display:flex;gap:12px;align-items:center;height:38px;padding:0 11px;border-radius:10px;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.72);transition:background .15s,color .15s;white-space:nowrap}
+.nav button svg,.sup button svg{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav button:hover,.sup button:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav button.on{background:rgba(255,255,255,.12);color:#fff;font-weight:700}
+.nav button.on::before{content:'';position:absolute;left:-14px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--acc2)}
+.sup{margin-top:auto;display:flex;flex-direction:column;gap:3px;position:relative;z-index:1}
+.sup button.on{background:rgba(245,158,11,.18);color:#FCD34D}
+.collapsed .lbl,.collapsed .brand div{display:none}
+.collapsed .sec{opacity:0;pointer-events:none}
+.collapsed .brand{justify-content:center;padding:0}
+.collapsed .nav button,.collapsed .sup button{justify-content:center;padding:0}
+.lbl{transition:opacity .15s}
+#btnCol svg{transition:transform .25s}.collapsed #btnCol svg{transform:rotate(180deg)}
+/* ---------- main ---------- */
+.main{position:absolute;left:calc(var(--rail) + 18px);right:18px;top:16px;bottom:16px;display:flex;flex-direction:column;gap:12px;transition:left .25s ease}
+.hdr{height:80px;flex:none;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 22px}
+.hl{min-width:0}
+.ht{display:flex;align-items:center;gap:10px}
+.hn{font-size:10px;font-weight:800;color:var(--acc);background:var(--soft);border-radius:6px;padding:3px 7px;letter-spacing:.06em}
+.ht h1{font-size:19px;font-weight:800;letter-spacing:-.3px}
+.hs{font-size:12px;line-height:1.5;color:var(--sub);margin-top:5px;max-width:640px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hr{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none}
+.pick{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;height:36px;padding:0 13px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:12px;font-weight:600;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.pick:hover,.pick.on{border-color:var(--acc2);box-shadow:0 0 0 3px var(--soft)}
+.pick svg{width:15px;height:15px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pick .chev{stroke:var(--muted)}
+.cmp{font-size:10.5px;color:var(--muted)}
+.cmp b{color:var(--sub);font-weight:600}
+/* ---------- kpi cards ---------- */
+.kpis{height:120px;flex:none;display:flex;gap:12px}
+.k{flex:1;min-width:0;background:var(--card);border-radius:var(--r);border:1px solid var(--line);padding:14px 16px 12px;display:flex;flex-direction:column;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kh{display:flex;align-items:center;gap:9px}
+.ki{width:26px;height:26px;border-radius:8px;background:var(--soft);display:grid;place-items:center;flex:none}
+.ki svg{width:14px;height:14px;stroke:var(--acc);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.kl{font-size:11px;font-weight:600;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kn{font-size:25px;font-weight:800;letter-spacing:-.6px;margin-top:7px;line-height:1}
+.kd{border-top:1px solid var(--line);margin-top:auto;padding-top:7px;display:flex;flex-direction:column;gap:3px}
+.kr{display:flex;justify-content:space-between;gap:8px;font-size:10px}
+.kr span{color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kr b{font-weight:700;white-space:nowrap}
+.k .why{position:absolute;inset:0;background:var(--ink);color:#fff;padding:14px 16px;font-size:10.5px;line-height:1.55;opacity:0;transition:opacity .2s;pointer-events:none}
+.k .why b{display:block;font-size:9px;letter-spacing:.14em;color:var(--acc3);margin-bottom:5px}
+.k:hover .why{opacity:1}
+/* ---------- body ---------- */
+#pages{flex:1;position:relative;min-height:0}
+.body{position:absolute;inset:0;display:grid;gap:12px}
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--shadow);padding:18px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.ct{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ct h3{font-size:14px;font-weight:700;letter-spacing:-.15px}
+.ct p{font-size:11px;line-height:1.45;color:var(--sub);margin-top:4px}
+.tog{display:flex;gap:2px;flex:none;background:var(--line2);border-radius:9px;padding:3px}
+.tog button{all:unset;cursor:pointer;font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:7px;color:var(--sub)}
+.tog button.on{background:#fff;color:var(--acc-d);box-shadow:0 1px 3px rgba(26,24,64,.12)}
+.fill{flex:1;min-height:0;position:relative;margin-top:14px}
+.fill[style*="overflow"]{overflow-x:hidden!important;scrollbar-width:thin}
+.foot{font-size:10.5px;color:var(--muted);margin-top:10px;line-height:1.45}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:99px;letter-spacing:.2px}
+.pill.good{background:#E3F6EF;color:var(--good)}.pill.bad{background:#FDE8E8;color:var(--bad)}.pill.acc{background:var(--soft);color:var(--acc-d)}.pill.warn{background:#FEF3DD;color:#B45309}.pill.mute{background:#F1F2F8;color:var(--sub)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-align:right;padding:7px 8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none;position:sticky;top:0;background:#fff}
+th:first-child,td:first-child{text-align:left}
+table[data-id="it"] td:nth-child(2),table[data-id="it"] th:nth-child(2){text-align:left}
+th.sorted{color:var(--acc)}
+td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line2);white-space:nowrap}
+tr:hover td{background:#FAFAFE}
+td .bar{display:inline-block;height:6px;border-radius:3px;background:var(--acc2);vertical-align:middle;margin-left:6px}
+.trunc{max-width:230px;overflow:hidden;text-overflow:ellipsis;display:inline-block;vertical-align:bottom}
+#tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:10.5px;line-height:1.5;padding:9px 11px;border-radius:10px;opacity:0;transition:opacity .12s;z-index:60;max-width:260px;box-shadow:0 10px 28px rgba(26,24,64,.3)}
+#tip b{color:var(--acc3)}
+.insight{background:linear-gradient(150deg,var(--navy1),#2E2A7A);color:#fff;border:none}
+.insight .ct p{color:#C9CAF5}
+.big{font-size:32px;font-weight:800;letter-spacing:-1px;line-height:1}
+.insight .lbl2{font-size:9.5px;font-weight:700;letter-spacing:.16em;color:var(--acc3)}
+.ovl{position:absolute;inset:0;z-index:50;display:none}
+.ovl.on{display:block}
+#howto{background:rgba(26,24,64,.45);backdrop-filter:blur(3px)}
+#howto .panel{position:absolute;right:20px;top:20px;bottom:20px;width:370px;background:#fff;border-radius:18px;padding:26px;overflow:auto}
+#howto h4{font-size:16px;margin-bottom:4px;line-height:1.35}
+#howto ol{margin-top:14px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:14px}
+#howto li{display:flex;gap:11px;font-size:11.5px;line-height:1.55;color:var(--sub)}
+#howto li i{flex:none;width:24px;height:24px;border-radius:8px;background:var(--soft);color:var(--acc-d);font-style:normal;font-weight:800;display:grid;place-items:center;font-size:11px}
+#howto li b{color:var(--ink)}
+#howto .x{all:unset;cursor:pointer;position:absolute;right:16px;top:12px;font-size:22px;color:var(--sub)}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--acc)}
+.build .card,.build .k{outline:2px dashed var(--warn);outline-offset:-2px}
+.tag{display:none;position:absolute;right:8px;bottom:8px;z-index:30;background:#FFF7E6;color:#92400E;border:1px solid #F5C66B;font-size:9px;font-weight:700;padding:3px 6px;border-radius:6px;max-width:92%;line-height:1.35;text-align:left}
+.build .tag{display:block}
+.legend{display:flex;gap:14px;font-size:10.5px;color:var(--sub);align-items:center}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips button{all:unset;cursor:pointer;font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--line2);color:var(--sub);text-transform:capitalize}
+.chips button.on{background:var(--acc);color:#fff}
+.note{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;color:#B45309;background:#FEF3DD;border-radius:6px;padding:2px 7px}
+/* ---------- date picker ---------- */
+#pop{position:absolute;z-index:55;display:none;background:#fff;border-radius:16px;border:1px solid var(--line);box-shadow:0 24px 60px rgba(26,24,64,.22);width:760px;overflow:hidden}
+#pop.on{display:flex}
+.pp-pre{width:190px;flex:none;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:2px;background:#FBFBFE}
+.pp-pre small{font-size:9.5px;font-weight:700;letter-spacing:.14em;color:var(--muted);padding:2px 10px 8px}
+.pp-pre button{all:unset;cursor:pointer;font-size:12px;font-weight:500;color:var(--sub);padding:8px 10px;border-radius:8px}
+.pp-pre button:hover{background:var(--soft);color:var(--ink)}
+.pp-pre button.on{background:var(--acc);color:#fff;font-weight:700}
+.pp-main{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.pp-cals{display:flex;gap:18px}
+.cal{flex:1}
+.cal h5{font-size:12px;font-weight:700;text-align:center;margin-bottom:8px}
+.cal .g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px 0}
+.cal .g span{font-size:9.5px;font-weight:700;color:var(--muted);text-align:center;padding-bottom:4px}
+.cal .g button{all:unset;cursor:pointer;height:28px;display:grid;place-items:center;font-size:11px;color:var(--ink);border-radius:0}
+.cal .g button:hover{background:var(--soft);border-radius:7px}
+.cal .g button.in{background:var(--soft);color:var(--acc-d)}
+.cal .g button.edge{background:var(--acc);color:#fff;font-weight:700;border-radius:7px}
+.cal .g button.hol{text-decoration:underline;text-decoration-color:var(--acc2);text-underline-offset:3px}
+.pp-ft{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:12px}
+.pp-ft p{font-size:11px;color:var(--sub);flex:1;padding-right:14px;line-height:1.45}.pp-ft p b{color:var(--ink)}
+.pp-ft div{display:flex;gap:8px}
+.pp-ft button{all:unset;cursor:pointer;white-space:nowrap;font-size:11.5px;font-weight:700;padding:8px 16px;border-radius:9px;background:var(--line2);color:var(--sub)}
+.pp-ft button.pri{background:var(--acc);color:#fff}
+.pp-ft button:disabled{opacity:.4;cursor:default}
+/* ---------- rolling table ---------- */
+.rt th{cursor:default;text-align:right}
+.rt thead tr:first-child th{text-align:center;color:var(--acc);border-bottom:none;padding-bottom:0;letter-spacing:.14em}
+.rt tbody th{position:static;text-align:left;font-size:11.5px;font-weight:600;color:var(--ink);letter-spacing:0;border-bottom:1px solid var(--line2);padding:4px 8px}
+.rt td{padding:4px 10px;font-size:11.5px}
+.rt thead th{padding:5px 8px}
+.rt td.p{color:var(--muted)}
+.rt td.sep,.rt th.sep{border-left:1px solid var(--line)}
+/* cover (00 Welcome) — landing-page hero: Briarport layout + Peaches atmosphere */
+.main.full .hdr,.main.full .kpis{display:none}
+#cover{position:absolute;inset:0;z-index:35;display:none;overflow:hidden;background:#07061A;color:#fff}
+#cover.on{display:block}
+.hx-tex{position:absolute;inset:0;background:url('assets/sessions_preview.png') center/cover;opacity:.05;filter:grayscale(1);-webkit-mask-image:radial-gradient(ellipse at 50% 40%,#000 20%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 40%,#000 20%,transparent 70%)}
+.hx-glow{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 62%,rgba(91,91,214,.30),transparent 70%),radial-gradient(ellipse 40% 30% at 18% 90%,rgba(91,214,176,.10),transparent 70%)}
+.hx-scene{position:absolute;inset:0}
+.hx-dim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,6,26,.55) 0%,rgba(7,6,26,.25) 45%,rgba(7,6,26,.65) 100%);opacity:0;animation:hxDim 1.6s ease 2.8s forwards}
+@keyframes hxDim{to{opacity:1}}
+.hx-curve{stroke-dasharray:3000;stroke-dashoffset:3000;animation:hxDraw 3.2s cubic-bezier(.65,0,.35,1) .3s forwards}
+@keyframes hxDraw{to{stroke-dashoffset:0}}
+.hx-bar{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);animation:hxRise 1.4s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes hxRise{to{transform:scaleY(1)}}
+.hx-wave{stroke-dasharray:14 22;animation:hxFlow 9s linear infinite}
+@keyframes hxFlow{to{stroke-dashoffset:-720}}
+.hx-pt{animation:hxFloat linear infinite}
+@keyframes hxFloat{0%{transform:translateY(0);opacity:0}15%{opacity:.9}100%{transform:translateY(-140px);opacity:0}}
+.hx-pulse{transform-box:fill-box;transform-origin:center;animation:hxPulse 2.2s ease-out 3.4s infinite;opacity:0}
+@keyframes hxPulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(3.2);opacity:0}}
+.hx-top{position:absolute;left:40px;right:40px;top:28px;display:flex;align-items:center;justify-content:space-between;z-index:5;opacity:0;animation:fadeSimple 1.2s ease 3.6s forwards}
+.hx-mark{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.85)}
+.hx-mark i{width:28px;height:28px;border-radius:8px;border:1.5px solid rgba(255,255,255,.5);display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:800;letter-spacing:0}
+.hx-acts{display:flex;gap:10px}
+.hx-acts a,.hx-acts button{all:unset;cursor:pointer;display:flex;align-items:center;gap:7px;height:30px;padding:0 13px;border-radius:7px;font-size:9.5px;font-weight:700;letter-spacing:.12em;color:#fff;background:rgba(91,91,214,.35);border:1px solid rgba(139,140,240,.45);transition:background .2s}
+.hx-acts a:hover,.hx-acts button:hover{background:rgba(91,91,214,.6)}
+.hx-acts button{background:transparent;border-color:rgba(255,255,255,.25)}
+.hx-center{position:absolute;left:0;right:0;top:150px;text-align:center;z-index:5}
+.hx-eb{font-size:11px;letter-spacing:.42em;color:rgba(255,255,255,.62);font-weight:500}
+.hx-title{font-size:56px;font-weight:800;letter-spacing:-.025em;margin-top:18px;line-height:1.04;text-shadow:0 10px 50px rgba(7,6,26,.8)}
+.hx-sub{font-size:15.5px;font-weight:400;color:rgba(255,255,255,.80);margin-top:16px}
+.hx-event{font-size:10px;letter-spacing:.3em;font-weight:700;color:rgba(255,255,255,.42);margin-top:22px}
+.hx-event span{color:var(--acc3)}
+.hx-band{position:absolute;left:0;right:0;bottom:0;height:132px;border-top:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(7,6,26,.55),rgba(7,6,26,.9));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:5;opacity:0;animation:fadeSimple 1.2s ease 4s forwards}
+.hx-band small{font-size:9.5px;letter-spacing:.3em;font-weight:600;color:rgba(255,255,255,.45)}
+.hx-btns{display:flex;gap:12px}
+.hx-btns button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;height:38px;padding:0 18px;border-radius:7px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);font-size:11.5px;font-weight:600;color:rgba(255,255,255,.88);transition:all .25s}
+.hx-btns button:hover{background:rgba(91,91,214,.35);border-color:rgba(139,140,240,.6);color:#fff;transform:translateY(-2px)}
+.hx-btns svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.hx-sig{position:absolute;right:42px;top:86px;text-align:right;z-index:5;opacity:0;animation:fadeSimple 1.5s ease 4.4s forwards}
+.hx-sig b{display:block;font:italic 400 26px/1 'Cormorant Garamond',Georgia,serif;color:rgba(255,255,255,.75)}
+.hx-sig small{font-size:8.5px;letter-spacing:.3em;color:rgba(255,255,255,.45)}
+.rv{opacity:0;filter:blur(12px);transform:translateY(18px);animation:rvIn 1.6s cubic-bezier(.16,1,.3,1) forwards}
+.rv-t{opacity:0;filter:blur(18px);transform:translateY(22px);animation:rvT 2.2s cubic-bezier(.16,1,.3,1) forwards}
+@keyframes rvIn{to{opacity:1;filter:blur(0);transform:none}}
+@keyframes rvT{from{letter-spacing:.04em}to{opacity:1;filter:blur(0);transform:none;letter-spacing:-.025em}}
+@keyframes fadeSimple{to{opacity:1}}
+</style>
+</head>
+<body>
+<div id="stage"><div id="canvas">
+  <aside class="rail">
+    <div class="brand"><div class="logo">G4</div><div><b>Merchandise Store</b><small>GA4 · Microsoft Fabric</small></div></div>
+    <div class="sec">CHOOSE A PAGE</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sup"><div class="sec" style="margin-top:0">SUPPORT</div>
+      <button id="btnHow" title="How to read"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/></svg><span class="lbl">How to read</span></button>
+      <button id="btnBuild" title="Show which measure / visual each block becomes in Power BI"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg><span class="lbl">Build notes</span></button>
+      <button id="btnCol" title="Collapse or expand the menu ( [ )"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span class="lbl">Collapse menu</span></button>
+    </div>
+  </aside>
+  <section class="main" id="main"><header class="hdr" id="hdr"></header><div class="kpis" id="kpis"></div><div id="pages"></div></section>
+  <div id="tip"></div>
+  <div id="pop" style="top:84px;right:40px"></div>
+  <div class="ovl" id="howto"><div class="panel"><button class="x" id="howX">×</button><div id="howBody"></div></div></div>
+  <div id="cover"></div>
+</div></div>
+<script src="data.js?v=20261113"></script>
+<script>
+const D = window.GA4;
+const DAY0 = '2020-11-01', DAYN = '2021-01-31', CART0 = '2020-11-25';
+const PRESETS = [['all','Full period'],['nov','November 2020'],['dec','December 2020'],['jan','January 2021'],['peak','Peak season'],['bfcm','Black Friday – Cyber Monday'],['l7','Last 7 days'],['l14','Last 14 days'],['l28','Last 28 days']];
+const S = {page: 0, key: 'all', range: {s: DAY0, e: DAYN}, p1metric: 'r', p4dim: 'all', p3type: 'all', p6metric: 'r', build: false, nav: true, sort: {}, pick: null};
+const C = getComputedStyle(document.documentElement);
+const T = k => C.getPropertyValue('--'+k).trim();
+
+/* ---------------- formatting ---------------- */
+const nz = v => v === null || v === undefined || Number.isNaN(v);
+const fInt = v => nz(v) ? '—' : v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v >= 1e4 ? (v/1e3).toFixed(1)+'K' : Math.round(v).toLocaleString('en-US');
+const fUsd = v => nz(v) ? '—' : '$' + fInt(v);
+const fUsd2 = v => nz(v) ? '—' : '$' + v.toFixed(2);
+const fPct = (v, d=2) => nz(v) ? '—' : (v*100).toFixed(d) + '%';
+const fSec = v => nz(v) ? '—' : Math.floor(v/60) + 'm ' + String(Math.floor(v%60)).padStart(2,'0') + 's';
+const fNum = (v, d=2) => nz(v) ? '—' : v.toFixed(d);
+const FMT = {int: fInt, usd: fUsd, usd2: fUsd2, pct: fPct, sec: fSec, num2: fNum};
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const dv = (a, b) => b ? a / b : null;
+
+/* ---------------- dates ---------------- */
+const U = s => new Date(s + 'T00:00:00Z');
+const dstr = d => d.toISOString().slice(0,10);
+const addD = (s, n) => { const d = U(s); d.setUTCDate(d.getUTCDate() + n); return dstr(d); };
+const nDays = (s, e) => Math.round((U(e) - U(s)) / 864e5) + 1;
+const mEnd = s => dstr(new Date(Date.UTC(+s.slice(0,4), +s.slice(5,7), 0)));
+const mStart = s => s.slice(0,8) + '01';
+const addM = (s, n) => { const y = +s.slice(0,4), m = +s.slice(5,7) - 1 + n, d = +s.slice(8,10); const last = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); return dstr(new Date(Date.UTC(y, m, Math.min(d, last)))); };
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], MONL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const sd = s => MON[+s.slice(5,7)-1] + ' ' + (+s.slice(8,10));
+const isFullMonth = (s, e) => s === mStart(s) && e === mEnd(s);
+function rangeLabel(s, e){
+  if (isFullMonth(s, e)) return MONL[+s.slice(5,7)-1] + ' ' + s.slice(0,4);
+  if (s === e) return sd(s) + ', ' + s.slice(0,4);
+  return s.slice(0,4) === e.slice(0,4) ? `${sd(s)} – ${sd(e)}, ${e.slice(0,4)}` : `${sd(s)}, ${s.slice(0,4)} – ${sd(e)}, ${e.slice(0,4)}`;
+}
+function ppRange(s, e){
+  const r = isFullMonth(s, e) ? {s: addM(s, -1), e: mEnd(addM(s, -1))} : {s: addD(s, -nDays(s, e)), e: addD(s, -1)};
+  return r.s >= DAY0 ? r : null;
+}
+const ppLabel = (s, e, p) => !p ? 'no earlier period in data' : isFullMonth(s, e) ? 'vs ' + MON[+p.s.slice(5,7)-1] + ' ' + p.s.slice(0,4) : `vs prior ${nDays(s, e)} days`;
+
+/* ---------------- daily engine (custom ranges + rolling windows) ---------------- */
+const tag0 = r => ({...r, d: r.date.slice(0,10)});
+const DAYS = D.day.filter(r => r.date).map(tag0), CHD = D.ch_day.filter(r => r.date).map(tag0), DVD = D.dev_day.filter(r => r.date).map(tag0);
+const DAYMAP = Object.fromEntries(DAYS.map(r => [r.d, r]));
+const F = ['s','r','tx','cs','pv','es','nu','et','vi','atc','bc','api','ps','ir','u'];
+function agg(s, e, rows = DAYS){
+  const o = {n: 0, cvi: 0, catc: 0, cbc: 0, capi: 0, cps: 0}; F.forEach(f => o[f] = 0);
+  for (const x of rows){ if (x.d < s || x.d > e) continue; o.n++; for (const f of F) o[f] += x[f] || 0;
+    if (x.d >= CART0){ o.cvi += x.vi||0; o.catc += x.atc||0; o.cbc += x.bc||0; o.capi += x.api||0; o.cps += x.ps||0; } }
+  o.cr = dv(o.cs, o.s); o.aov = dv(o.r, o.tx); o.rps = dv(o.r, o.s); return o;
+}
+const dow = s => (U(s).getUTCDay() + 6) % 7;
+const DOWN = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+function weekdayRows(s, e){
+  const g = DOWN.map((n,i) => ({day_of_week_num: i+1, day_name: n, day_short: n.slice(0,3), is_weekend: i >= 5, days: 0, r: 0, s: 0, cs: 0}));
+  let tr = 0, tn = 0;
+  for (const x of DAYS){ if (x.d < s || x.d > e) continue; const w = g[dow(x.d)]; w.days++; w.r += x.r||0; w.s += x.s||0; w.cs += x.cs||0; tr += x.r||0; tn++; }
+  const avg = dv(tr, tn);
+  return g.filter(w => w.days).map(w => ({...w, adr: w.r / w.days, ads: w.s / w.days, ix: dv(w.r / w.days, avg), cr: dv(w.cs, w.s)}));
+}
+function weeklyRows(s, e){
+  const g = {};
+  for (const x of DAYS){ if (x.d < s || x.d > e) continue; const ws = addD(x.d, -dow(x.d)); (g[ws] ||= []).push(x); }
+  return Object.entries(g).sort().map(([ws, rows]) => { const a = rows[0].d, b = rows[rows.length-1].d, o = agg(a, b);
+    const p = addD(a, -7) >= DAY0 ? agg(addD(a, -7), addD(b, -7)) : null;
+    return {week_start: ws + 'T00:00:00', days: rows.length, r: o.r, s: o.s, cr: o.cr, tx: o.tx, wr: p && p.r ? (o.r - p.r) / p.r : null, ws: p && p.s ? (o.s - p.s) / p.s : null}; });
+}
+function groupRows(rows, key, s, e){
+  const g = {}; for (const x of rows) if (x.d >= s && x.d <= e && x[key]) (g[x[key]] ||= []).push(x);
+  const tot = agg(s, e);
+  return Object.entries(g).map(([k, rs]) => { const o = agg(s, e, rs), ss = dv(o.s, tot.s), rsh = dv(o.r, tot.r);
+    return {[key]: k, s: o.s, r: o.r, tx: o.tx, cr: o.cr, aov: o.aov, rps: o.rps, ss, rs: rsh, ri: dv(rsh, ss), cvs: o.cr !== null && tot.cr !== null ? (o.cr - tot.cr) * 100 : null,
+      vi: o.cvi, atc: o.catc, bc: o.cbc, api: o.capi, ps: o.cps}; });
+}
+function tiCalc(s, e){
+  const ms = mStart(e), pms = addM(ms, -1), pme = addM(e, -1);
+  const mtd = agg(ms, e), pm = pms >= DAY0 ? agg(pms, pme) : null;
+  const l7 = agg(addD(e, -6), e), p7 = addD(e, -13) >= DAY0 ? agg(addD(e, -13), addD(e, -7)) : null;
+  const a7 = addD(e, -6) >= DAY0 ? l7.r / 7 : null, a28 = addD(e, -27) >= DAY0 ? agg(addD(e, -27), e).r / 28 : null;
+  const wd = weekdayRows(s, e), best = wd.slice().sort((a,b) => b.adr - a.adr)[0], worst = wd.slice().sort((a,b) => a.adr - b.adr)[0];
+  const tot = agg(s, e); let we = {r: 0, n: 0, s: 0, cs: 0}, wk = {s: 0, cs: 0};
+  for (const x of DAYS){ if (x.d < s || x.d > e) continue; if (dow(x.d) >= 5){ we.r += x.r||0; we.n++; we.s += x.s||0; we.cs += x.cs||0; } else { wk.s += x.s||0; wk.cs += x.cs||0; } }
+  const pc = (a, b) => b ? (a - b) / b : null;
+  return {'Revenue MTD': mtd.r, 'Revenue PMTD': pm ? pm.r : null, 'Revenue MTD vs PMTD %': pm ? pc(mtd.r, pm.r) : null,
+    'Sessions MTD': mtd.s, 'Sessions PMTD': pm ? pm.s : null, 'Sessions MTD vs PMTD %': pm ? pc(mtd.s, pm.s) : null,
+    'Conversion Rate MTD': mtd.cr, 'Conversion Rate PMTD': pm ? pm.cr : null, 'Conversion Rate MTD vs PMTD pts': pm ? (mtd.cr - pm.cr) * 100 : null,
+    'MTD Label': pm ? `vs ${MON[+pms.slice(5,7)-1]} 1–${+pme.slice(8,10)}` : 'no prior month in data',
+    'Revenue L7D': l7.r, 'Revenue P7D': p7 ? p7.r : null, 'Revenue WoW %': p7 ? pc(l7.r, p7.r) : null,
+    'Revenue 7D Avg': a7, 'Revenue 28D Avg': a28, 'Revenue Momentum %': a28 ? pc(a7, a28) : null,
+    'Best Weekday': best ? best.day_name : '—', 'Worst Weekday': worst ? worst.day_name : '—', 'Best Weekday Index': best ? best.ix : null,
+    'Weekend Revenue Share': dv(we.r, tot.r), 'Weekend Day Share': dv(we.n, tot.n), 'Weekend Conversion Rate': dv(we.cs, we.s), 'Weekday Conversion Rate': dv(wk.cs, wk.s)};
+}
+const PTS = ['Conversion Rate','Engagement Rate','Cart Abandonment Rate','View Item to Purchase Rate'];
+function kpiVals(o){
+  return o && {'Sessions': o.s, 'Revenue': o.r, 'Transactions': o.tx, 'Conversion Rate': o.cr, 'AOV': o.aov, 'Revenue per Session': o.rps,
+    'Pageviews': o.pv, 'Pages per Session': dv(o.pv, o.s), 'Engagement Rate': dv(o.es, o.s), 'New Users': o.nu, 'Avg Engagement Time (sec)': dv(o.et, o.s),
+    'View Item Sessions': o.vi, 'Begin Checkout Sessions': o.bc, 'Purchase Sessions': o.ps, 'Cart Abandonment Rate': o.catc ? 1 - o.cps / o.catc : null,
+    'Item Revenue': o.ir, 'Units Purchased': o.u, 'Avg Item Price': dv(o.ir, o.u), 'View Item to Purchase Rate': dv(o.cps, o.cvi)};
+}
+/* week over week: last 7 days ending on the period end vs the 7 days before (every KPI, every window) */
+function wowKpi(e){
+  const o = {}, names = Object.keys(kpiVals(agg(e, e)));
+  const c = addD(e, -6) >= DAY0 ? kpiVals(agg(addD(e, -6), e)) : null;
+  const p = c && addD(e, -13) >= DAY0 ? kpiVals(agg(addD(e, -13), addD(e, -7))) : null;
+  for (const n of names){ const a = c ? c[n] : null, b = p ? p[n] : null, ok = !nz(a) && !nz(b);
+    o[n + ' L7D'] = a ?? null;
+    if (PTS.includes(n)) o[n + ' L7D Δ pts'] = ok ? (a - b) * 100 : null; else o[n + ' L7D Δ%'] = ok && b ? (a - b) / b : null; }
+  return o;
+}
+function buildView(){
+  const {s, e} = S.range;
+  if (S.key !== 'custom') return {...D[S.key], kpi: {...D[S.key].kpi, ...wowKpi(e)}, custom: false, base: S.key};
+  const base = s.slice(0,7) === e.slice(0,7) ? {'2020-11':'nov','2020-12':'dec','2021-01':'jan'}[s.slice(0,7)] : 'all';
+  const B = D[base], c = agg(s, e), pr = ppRange(s, e), p = pr ? agg(pr.s, pr.e) : null, cv = kpiVals(c), pv = kpiVals(p);
+  const K = {...B.kpi, ...cv, 'Users': null, 'Items Sold': null};
+  for (const n in cv){ const a = cv[n], b = pv ? pv[n] : null, ok = !nz(a) && !nz(b);
+    K[n + ' PP'] = b; if (PTS.includes(n)) K[n + ' Δ pts'] = ok ? (a - b) * 100 : null; else K[n + ' Δ%'] = ok && b ? (a - b) / b : null; }
+  K['Period Label'] = rangeLabel(s, e); K['PP Label'] = ppLabel(s, e, pr);
+  K['Session to View Item Rate'] = dv(c.vi, c.s); K['View Item to Cart Rate'] = dv(c.catc, c.cvi);
+  let best = null; for (const x of DAYS) if (x.d >= s && x.d <= e && (!best || x.r > best.r)) best = x;
+  K['Best Revenue Day'] = best ? `${sd(best.d)} · ${fUsd(best.r)}` : '—';
+  Object.assign(K, tiCalc(s, e), wowKpi(e));
+  const channel = groupRows(CHD, 'channel_group', s, e), device = groupRows(DVD, 'device_category', s, e);
+  const top = channel.slice().sort((a,b) => b.r - a.r)[0];
+  K['Top Channel'] = top ? top.channel_group : '—'; K['Revenue Share of Top Channel'] = top ? top.rs : null;
+  const V = {...B, kpi: K, channel, device, funnel_ch: channel, funnel: {vi: c.cvi, atc: c.catc, bc: c.cbc, api: c.capi, ps: c.cps},
+    weekly: weeklyRows(s, e), weekday: weekdayRows(s, e), custom: true, base};
+  K['01 Headline'] = K['Revenue Δ%'] !== null && K['Revenue Δ%'] !== undefined
+    ? `Revenue ${K['Revenue Δ%'] >= 0 ? 'grew' : 'fell'} ${fPct(Math.abs(K['Revenue Δ%']),0)} ${K['PP Label']}, and ${K['Top Channel']} carried ${fPct(K['Revenue Share of Top Channel'],0)} of it.`
+    : `${fUsd(c.r)} in revenue from ${fInt(c.s)} sessions; ${K['Top Channel']} carried ${fPct(K['Revenue Share of Top Channel'],0)} of it.`;
+  const big = channel.filter(x => x.ss >= .02), bySes = big.slice().sort((a,b) => b.s - a.s)[0], byIx = big.slice().sort((a,b) => (b.ri||0) - (a.ri||0))[0];
+  if (bySes && byIx) K['02 Headline'] = `${bySes.channel_group} brings ${fPct(bySes.ss,0)} of sessions and ${fPct(bySes.rs,0)} of revenue; ${byIx.channel_group} earns ${(byIx.ri||0).toFixed(1)}× its share of traffic.`;
+  const f = V.funnel, steps = [['view → cart', f.atc/f.vi], ['cart → checkout', f.bc/f.atc], ['checkout → payment', f.api/f.bc], ['payment → purchase', f.ps/f.api]].filter(x => isFinite(x[1]));
+  const leak = steps.sort((a,b) => a[1] - b[1])[0];
+  if (leak) K['04 Headline'] = `${fPct(K['Session to View Item Rate'],0)} of sessions open a product page, and ${leak[0]} loses the most shoppers (${fPct(1 - leak[1],0)} drop out).`;
+  const mt = K['Revenue MTD vs PMTD %'], mo = K['Revenue Momentum %'];
+  K['06 Headline'] = !nz(mt) ? `${MONL[+e.slice(5,7)-1]} revenue is pacing ${fPct(Math.abs(mt),0)} ${mt >= 0 ? 'ahead of' : 'behind'} the same days of ${MONL[+addM(e,-1).slice(5,7)-1]}${nz(mo) ? '.' : `, and the 7-day trend is ${fPct(Math.abs(mo),0)} ${mo >= 0 ? 'above' : 'below'} the 28-day average.`}`
+    : !nz(mo) ? `The 7-day revenue trend ends ${fPct(Math.abs(mo),0)} ${mo >= 0 ? 'above' : 'below'} the 28-day average.` : `${K['Best Weekday']}s earn ${(K['Best Weekday Index']||0).toFixed(1)}× a typical day's revenue.`;
+  return V;
+}
+let VIEW = null;
+const P = () => VIEW;
+const K = n => VIEW.kpi[n];
+
+/* ---------------- tooltip ---------------- */
+const tip = document.getElementById('tip'), canvas = document.getElementById('canvas');
+let scale = 1;
+function showTip(e, html){
+  const r = canvas.getBoundingClientRect();
+  tip.innerHTML = html; tip.style.opacity = 1;
+  let x = (e.clientX - r.left)/scale + 14, y = (e.clientY - r.top)/scale + 14;
+  if (x > 1000) x -= 290; if (y > 620) y -= 90;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => tip.style.opacity = 0;
+function bindTips(root){
+  root.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mousemove', e => showTip(e, el.getAttribute('data-tip')));
+    el.addEventListener('mouseleave', hideTip);
+  });
+}
+
+/* ---------------- icons ---------------- */
+const IC = {
+  home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>', chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M3 12h18"/>', doc:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  funnel:'<path d="M3 4h18l-7 8v6l-4 2v-8z"/>', bag:'<path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/>', clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  dollar:'<path d="M12 2v20M17 6.5C17 4.6 14.8 4 12 4S7 5 7 7.5 9.5 10.5 12 11s5 1.5 5 4-2.2 3.5-5 3.5-5-.8-5-2.8"/>', users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 20a6.5 6.5 0 0 0-3-5.5"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>', receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', layers:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+  cart:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.5 12h11L21 7H6"/>', tag:'<path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>', cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>', help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/>',
+  build:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>', col:'<path d="M15 6l-6 6 6 6"/>', chev:'<path d="M6 9l6 6 6-6"/>',
+};
+const svg = (k, cls='') => `<svg viewBox="0 0 24 24" class="${cls}">${IC[k]}</svg>`;
+
+/* ---------------- pages ---------------- */
+// KPI card: [label, measure, format, delta measure, 'pct'|'pts', prior measure, prior label ('=text' | measure | null → PP Label), inverse, icon]
+const kp = (l, m, f, ic, pts, inv) => [l, m, f, m + (pts ? ' Δ pts' : ' Δ%'), pts ? 'pts' : 'pct', m + ' PP', null, inv, ic];
+const PAGES = [
+  {id:'welcome', nav:'Welcome', ic:'home', full:true, q:'What is in this report, and where should you start?', kpis:[]},
+  {id:'overview', nav:'Overview', ic:'chart', q:'Is revenue up or down, and which channel drove the change?',
+   kpis:[kp('Revenue','Revenue','usd','dollar'), kp('Sessions','Sessions','int','users'), kp('Conversion rate','Conversion Rate','pct','target',1), kp('Average order value','AOV','usd2','tag'), kp('Transactions','Transactions','int','receipt')]},
+  {id:'acq', nav:'Acquisition', ic:'globe', q:'Which sources bring revenue, not just sessions?',
+   kpis:[kp('Sessions','Sessions','int','users'), kp('New users','New Users','int','users'), kp('Engagement rate','Engagement Rate','pct','bolt',1), kp('Revenue per session','Revenue per Session','usd2','dollar')]},
+  {id:'content', nav:'Content & Landing', ic:'doc', q:'Which landing pages earn, and which only attract sessions?',
+   kpis:[kp('Pageviews','Pageviews','int','eye'), kp('Pages per session','Pages per Session','num2','layers'), kp('Engagement time','Avg Engagement Time (sec)','sec','clock'), kp('Revenue per session','Revenue per Session','usd2','dollar')]},
+  {id:'funnel', nav:'Funnel', ic:'funnel', q:'Where do shoppers drop between product view and purchase?',
+   kpis:[kp('Product viewers','View Item Sessions','int','eye'), kp('Checkout sessions','Begin Checkout Sessions','int','cart'), kp('Buyers','Purchase Sessions','int','receipt'), kp('Cart abandonment','Cart Abandonment Rate','pct','funnel',1,1)]},
+  {id:'products', nav:'Products', ic:'bag', q:'Which products and categories carry the revenue?',
+   kpis:[kp('Item revenue','Item Revenue','usd','dollar'), kp('Units sold','Units Purchased','int','box'), kp('Average item price','Avg Item Price','usd2','tag'), kp('Distinct items sold','Items Sold','int','layers')]},
+  {id:'time', nav:'Time Intelligence', ic:'clock', q:'Is the business speeding up or slowing down, and when in the week does it earn?',
+   kpis:[['Revenue MTD','Revenue MTD','usd','Revenue MTD vs PMTD %','pct','Revenue PMTD','MTD Label',0,'dollar'],
+         ['Sessions MTD','Sessions MTD','int','Sessions MTD vs PMTD %','pct','Sessions PMTD','MTD Label',0,'users'],
+         ['Conversion MTD','Conversion Rate MTD','pct','Conversion Rate MTD vs PMTD pts','pts','Conversion Rate PMTD','MTD Label',0,'target'],
+         ['Revenue last 7 days','Revenue L7D','usd','Revenue WoW %','pct','Revenue P7D','=Prior 7 days',0,'cal'],
+         ['Revenue 7-day average','Revenue 7D Avg','usd','Revenue Momentum %','pct','Revenue 28D Avg','=28-day average',0,'bolt']]},
+];
+PAGES.forEach((p,i) => p.num = String(i).padStart(2,'0'));
+
+const KDEF = {
+  'Revenue': ['Purchase revenue in USD from all sessions in the window.', 'The bottom line. Every other card explains where it came from.'],
+  'Sessions': ['Visits to the site. One person can start several sessions.', 'Traffic. Revenue rises with visits or with conversion, so read both.'],
+  'Conversion rate': ['Sessions with a purchase divided by all sessions.', 'How well visitors become buyers. Shown in points so small moves stay readable.'],
+  'Average order value': ['Revenue divided by transactions: what one order is worth.', 'Rising AOV with flat conversion means bigger baskets.'],
+  'Transactions': ['Orders placed in the window, each counted once.', 'Revenue equals transactions times AOV. Read them together.'],
+  'New users': ['Visitors who saw the site for the first time.', 'Reach. Many new users with flat revenue means they are not converting yet.'],
+  'Engagement rate': ['Sessions over 10 seconds, with a conversion, or with 2+ pages.', 'Traffic quality. Low engagement means the wrong audience arrived.'],
+  'Revenue per session': ['Revenue divided by sessions: what one visit is worth.', 'Compares channels of any size fairly, because it removes volume.'],
+  'Pageviews': ['Pages loaded in the window.', 'Reach of the content. Read it with pages per session.'],
+  'Pages per session': ['Pageviews divided by sessions: how deep each visit goes.', 'Low depth on busy landing pages means they do not guide people on.'],
+  'Engagement time': ['Average seconds the site was in focus per session.', 'Attention. Long time on a page that earns nothing needs a fix.'],
+  'Product viewers': ['Sessions that viewed a product page.', 'Top of the shopping funnel. Compare with checkout to find the leak.'],
+  'Checkout sessions': ['Sessions that started checkout.', 'Buying intent. A big gap to buyers points at the checkout itself.'],
+  'Buyers': ['Sessions that completed a purchase.', 'The end of the funnel, counted in people rather than percentages.'],
+  'Cart abandonment': ['Add-to-cart sessions that did not buy, counted from Nov 25.', 'Lower is better. Falling with flat sessions is a checkout win.'],
+  'Item revenue': ['Revenue from products sold, item by item.', 'Shows which products carry the money. Can differ from order revenue.'],
+  'Units sold': ['Items purchased, counting every unit in the basket.', 'Volume. Units up with revenue flat means a cheaper mix or discounts.'],
+  'Average item price': ['Item revenue divided by units sold.', 'A falling price with rising units often means promotions drove volume.'],
+  'Distinct items sold': ['Different products that sold at least once.', 'Range. More products selling means less reliance on a few hero items.'],
+  'Revenue MTD': ['Revenue from the 1st of the month to the last selected day.', 'Pace this month, against the same days of the previous month.'],
+  'Sessions MTD': ['Sessions from the 1st of the month to the last selected day.', 'Traffic pace this month, against the same days last month.'],
+  'Conversion MTD': ['Sessions with a purchase divided by all sessions, month to date.', 'Is buying getting easier or harder this month?'],
+  'Revenue last 7 days': ['Revenue in the 7 days ending on the last selected day.', 'The latest week. The change shows week over week.'],
+  'Revenue 7-day average': ['Average daily revenue over the last 7 days.', 'Above the 28-day average means the business is accelerating.'],
+};
+
+/* Pages 1-5: value row = last 7 days, change = week over week. Page 6 keeps its month-to-date and prior-period comparisons. */
+function renderKpis(pg){
+  const el = document.getElementById('kpis');
+  const wow = pg.id !== 'time';
+  el.innerHTML = pg.kpis.map(([label, m, kind, dm, dk, pm, pl, inv, ic], i) => {
+    const pts = dk === 'pts', v = K(m);
+    let d, pv, rowLab, chgLab, tip = '';
+    if (wow){
+      d = K(m + (pts ? ' L7D Δ pts' : ' L7D Δ%')); pv = K(m + ' L7D');
+      rowLab = 'Last 7 days'; chgLab = 'WoW';
+      tip = 'Week over week: the last 7 days of the selection against the 7 days before them.';
+    } else {
+      d = K(dm); pv = K(pm);
+      if (nz(pv) && !nz(d) && !nz(v)) pv = pts ? v - d / 100 : v / (1 + d);
+      const plab = !pl ? K('PP Label') : pl[0] === '=' ? pl.slice(1) : K(pl);
+      const none = !plab || /no (earlier|prior)/.test(plab);
+      rowLab = none ? 'Prior period' : plab.replace(/^vs /,'').replace(/^prior/,'Prior');
+      if (none) pv = null; chgLab = 'Change';
+    }
+    let dt = '—', col = T('muted');
+    if (!nz(d)) { const good = (d >= 0) !== !!inv; col = good ? T('good') : T('bad');
+      dt = (d >= 0 ? '▲ +' : '▼ −') + (pts ? Math.abs(d).toFixed(2) + ' pts' : (Math.abs(d)*100).toFixed(1) + '%'); }
+    const def = KDEF[label];
+    return `<div class="k"><div class="kh"><span class="ki">${svg(ic)}</span><span class="kl">${label}</span></div>
+      <div class="kn">${nz(v) ? '—' : FMT[kind](v)}</div>
+      <div class="kd"><div class="kr"><span>${esc(rowLab)}</span><b style="color:${T('sub')}">${nz(pv) ? 'not in data' : FMT[kind](pv)}</b></div>
+      <div class="kr" title="${esc(tip)}"><span>${chgLab}</span><b style="color:${col}">${dt}</b></div></div>
+      ${def ? `<div class="why"><b>WHAT IT IS</b>${def[0]}<b>WHY IT MATTERS</b>${def[1]}</div>` : ''}
+      ${i===0?`<div class="tag">HTML Content · [${pg.num} · 001 KPI Strip HTML] (one measure, all cards)</div>`:''}</div>`;
+  }).join('');
+}
+
+/* ---------------- date picker ---------------- */
+const HOL = {'2020-11-27':'Black Friday','2020-11-30':'Cyber Monday','2020-12-25':'Christmas','2021-01-01':'New Year'};
+function openPicker(){ S.pick = {s: S.range.s, e: S.range.e}; drawPicker(); document.getElementById('pop').classList.add('on'); document.getElementById('pickBtn').classList.add('on'); }
+function closePicker(){ S.pick = null; document.getElementById('pop').classList.remove('on'); const b = document.getElementById('pickBtn'); if (b) b.classList.remove('on'); }
+function applyRange(s, e, key){ S.range = {s, e}; S.key = key || (D.__presetOf[s + '|' + e]) || 'custom'; closePicker(); render(); }
+function drawPicker(){
+  const pop = document.getElementById('pop'), pk = S.pick;
+  const months = ['2020-11-01','2020-12-01','2021-01-01'];
+  const cal = m => { const first = dow(m), last = +mEnd(m).slice(8,10); let cells = '';
+    for (let i = 0; i < first; i++) cells += '<i></i>';
+    for (let d = 1; d <= last; d++){ const ds = m.slice(0,8) + String(d).padStart(2,'0');
+      const edge = ds === pk.s || ds === pk.e, inr = pk.s && pk.e && ds > pk.s && ds < pk.e;
+      cells += `<button data-d="${ds}" class="${edge?'edge':inr?'in':''} ${HOL[ds]?'hol':''}" ${HOL[ds]?`title="${HOL[ds]}"`:''}>${d}</button>`; }
+    return `<div class="cal"><h5>${MONL[+m.slice(5,7)-1]} ${m.slice(0,4)}</h5><div class="g">${['Mo','Tu','We','Th','Fr','Sa','Su'].map(x => `<span>${x}</span>`).join('')}${cells}</div></div>`; };
+  const ok = pk.s && pk.e;
+  pop.innerHTML = `<div class="pp-pre"><small>QUICK RANGES</small>${PRESETS.map(([k,t]) => `<button data-k="${k}" class="${S.key===k?'on':''}">${t}</button>`).join('')}</div>
+    <div class="pp-main"><div class="pp-cals">${months.map(cal).join('')}</div>
+    <div class="pp-ft"><p>${ok ? `<b>${rangeLabel(pk.s, pk.e)}</b> · ${nDays(pk.s, pk.e)} days · compared with ${ppLabel(pk.s, pk.e, ppRange(pk.s, pk.e)).replace(/^vs /,'')}` : pk.s ? `From <b>${sd(pk.s)}</b> — pick an end date` : 'Pick a start date'}</p>
+    <div><button data-c>Cancel</button><button class="pri" data-a ${ok?'':'disabled'}>Apply range</button></div></div></div>`;
+  pop.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const r = D[b.dataset.k].range; applyRange(r[0], r[1], b.dataset.k); });
+  pop.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const d = b.dataset.d;
+    if (!pk.s || pk.e) { pk.s = d; pk.e = null; } else if (d < pk.s) { pk.e = pk.s; pk.s = d; } else pk.e = d; drawPicker(); });
+  pop.querySelector('[data-c]').onclick = closePicker;
+  pop.querySelector('[data-a]').onclick = () => ok && applyRange(pk.s, pk.e);
+}
+D.__presetOf = Object.fromEntries(PRESETS.map(([k]) => [D[k].range.join('|'), k]));
+
+/* ---------------- rolling-window table ---------------- */
+function rollTable(){
+  const e = S.range.e, M = [['Sessions','s','int'],['Pageviews','pv','int'],['Transactions','tx','int'],['Revenue','r','usd'],['Conversion rate','cr','pct',1],['Average order value','aov','usd2']];
+  const W = [7, 14, 28].map(n => ({n, c: agg(addD(e, -(n-1)), e), p: addD(e, -(2*n-1)) >= DAY0 ? agg(addD(e, -(2*n-1)), addD(e, -n)) : null}));
+  const chg = (a, b, pts) => { if (nz(a) || nz(b) || (!pts && !b)) return '<span style="color:var(--muted)">—</span>';
+    const d = pts ? (a - b) * 100 : (a - b) / b, g = d >= 0;
+    return `<span class="pill ${g?'good':'bad'}">${g?'▲ +':'▼ −'}${pts ? Math.abs(d).toFixed(2)+' pts' : (Math.abs(d)*100).toFixed(1)+'%'}</span>`; };
+  return `<table class="rt"><thead><tr><th></th>${W.map(w => `<th colspan="3" class="sep">LAST ${w.n} DAYS</th>`).join('')}</tr>
+    <tr><th style="text-align:left">METRIC</th>${W.map(() => '<th class="sep">VALUE</th><th>PRIOR</th><th>CHANGE</th>').join('')}</tr></thead>
+    <tbody>${M.map(([l,f,k,pts]) => `<tr><th>${l}</th>${W.map(w => `<td class="sep"><b>${FMT[k](w.c[f])}</b></td><td class="p">${w.p ? FMT[k](w.p[f]) : '—'}</td><td>${chg(w.c[f], w.p && w.p[f], pts)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+/* ---------------- shared chart pieces ---------------- */
+function hbars(rows, {label, value, fmt, color, max, sub, tipf, hi}){
+  const mx = max ?? (Math.max(...rows.map(r => value(r) || 0)) || 1);
+  return rows.map(r => {
+    const v = value(r) || 0, w = Math.max(v/mx*100, .8);
+    const c = typeof color === 'function' ? color(r) : (color || T('acc'));
+    return `<div class="hb" data-tip="${tipf?esc(tipf(r)):''}" style="display:grid;grid-template-columns:150px 1fr 60px;gap:8px;align-items:center;padding:3px 0;${hi&&hi(r)?'font-weight:700':''}">
+      <div style="font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(label(r))}${sub?`<div style="font-size:9px;color:${T('muted')};font-weight:500">${sub(r)}</div>`:''}</div>
+      <div style="height:12px;background:${T('soft')};border-radius:6px;overflow:hidden"><div style="height:100%;width:${w}%;background:${c};border-radius:6px;transition:width .4s"></div></div>
+      <div style="font-size:10.5px;font-weight:700;text-align:right">${fmt(v)}</div></div>`;
+  }).join('');
+}
+function sortTable(id, rows, cols, defKey){
+  const st = S.sort[id] || {k: defKey, d: -1};
+  const sorted = rows.slice().sort((a,b) => ((a[st.k] ?? -1e18) > (b[st.k] ?? -1e18) ? 1 : -1) * st.d);
+  return `<table data-id="${id}"><thead><tr>${cols.map(c => `<th data-k="${c.k}" class="${st.k===c.k?'sorted':''}">${c.h}${st.k===c.k?(st.d<0?' ↓':' ↑'):''}</th>`).join('')}</tr></thead>
+    <tbody>${sorted.map(r => `<tr ${r._tip?`data-tip="${esc(r._tip)}"`:''}>${cols.map(c => `<td>${c.f(r)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function bindSort(root){
+  root.querySelectorAll('table[data-id] th').forEach(th => th.addEventListener('click', () => {
+    const id = th.closest('table').dataset.id, k = th.dataset.k, cur = S.sort[id];
+    S.sort[id] = {k, d: cur && cur.k === k ? -cur.d : -1}; render();
+  }));
+}
+const tag = t => `<div class="tag">${t}</div>`;
+const SLOTS = {};
+const slot = (id, fn) => { SLOTS[id] = fn; return `<div class="slot" data-slot="${id}" style="position:absolute;inset:0"></div>`; };
+function fillSlots(root){ root.querySelectorAll('[data-slot]').forEach(el => { const fn = SLOTS[el.dataset.slot]; if (fn) el.innerHTML = fn(el.clientWidth, el.clientHeight); }); }
+
+/* ================= PAGE 1 · OVERVIEW ================= */
+function page1(){
+  const daily = D.daily.filter(d => d.date), m = S.p1metric;
+  const sel = !(S.range.s === DAY0 && S.range.e === DAYN);
+  const trendSvg = (W, H) => { const pl = 38, pr = 10, pt = 26, pb = 22;
+  const vals = daily.map(d => d[m] ?? 0), mx = Math.max(...vals) * 1.08;
+  const x = i => pl + i * (W - pl - pr) / (daily.length - 1), y = v => pt + (1 - v / mx) * (H - pt - pb);
+  const inSel = d => d.date.slice(0,10) >= S.range.s && d.date.slice(0,10) <= S.range.e;
+  let band = '', peakStart = daily.findIndex(d => d.is_peak_season), peakEnd = daily.length - 1 - [...daily].reverse().findIndex(d => d.is_peak_season);
+  band = `<rect x="${x(peakStart)}" y="${pt}" width="${x(peakEnd)-x(peakStart)}" height="${H-pt-pb}" fill="${T('soft')}"/>
+          <text x="${x(peakStart)+6}" y="${H-pb-7}" font-size="9" font-weight="700" fill="${T('acc')}" letter-spacing="1">PEAK SEASON · ${fPct(D.all.kpi['Peak Season Day Share'],0)} OF DAYS</text>`;
+  if (sel) { const a = daily.findIndex(inSel), b = daily.length-1-[...daily].reverse().findIndex(inSel);
+    band += `<rect x="${x(0)}" y="${pt}" width="${x(a)-x(0)}" height="${H-pt-pb}" fill="#fff" fill-opacity=".72"/><rect x="${x(b)}" y="${pt}" width="${x(daily.length-1)-x(b)}" height="${H-pt-pb}" fill="#fff" fill-opacity=".72"/>`; }
+  const path = vals.map((v,i) => (i?'L':'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join('');
+  const area = path + `L${x(daily.length-1)},${H-pb}L${x(0)},${H-pb}Z`;
+  const imax = vals.indexOf(Math.max(...vals));
+  const fm = m === 'r' ? fUsd : m === 's' ? fInt : v => fPct(v);
+  let grid = ''; for (let g = 0; g <= 3; g++) { const gv = mx * g / 3; grid += `<line x1="${pl}" x2="${W-pr}" y1="${y(gv)}" y2="${y(gv)}" stroke="${T('line')}"/><text x="${pl-6}" y="${y(gv)+3}" font-size="9" fill="${T('muted')}" text-anchor="end">${m==='cr'?(gv*100).toFixed(1)+'%':fInt(gv)}</text>`; }
+  const months = [['Nov',0],['Dec',30],['Jan',61]].map(([t,i]) => `<text x="${x(i)}" y="${H-6}" font-size="9.5" fill="${T('sub')}" font-weight="600">${t}</text>`).join('');
+  const hol = daily.map((d,i) => d.holiday_name ? `<g data-tip="<b>${d.holiday_name}</b> · ${d.date.slice(0,10)}<br>Revenue ${fUsd(d.r)} · ${fInt(d.s)} sessions · CR ${fPct(d.cr)}"><line x1="${x(i)}" x2="${x(i)}" y1="${y(vals[i])}" y2="${H-pb}" stroke="${T('acc')}" stroke-dasharray="2 3"/><circle cx="${x(i)}" cy="${y(vals[i])}" r="4" fill="#fff" stroke="${T('acc')}" stroke-width="2"/><text x="${x(i)}" y="${y(vals[i])-8}" font-size="8.5" font-weight="700" text-anchor="middle" fill="${T('ink')}">${d.holiday_name.replace('Cyber Monday','Cyber Mon').replace('Black Friday','Black Fri')}</text></g>` : '').join('');
+  const hits = daily.map((d,i) => `<rect x="${x(i)-3.5}" y="${pt}" width="7" height="${H-pt-pb}" fill="transparent" data-tip="<b>${new Date(d.date).toDateString().slice(0,10)}</b><br>Revenue ${fUsd(d.r)}<br>Sessions ${fInt(d.s)}<br>Conversion ${fPct(d.cr)}"/>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${band}${grid}
+    <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${T('acc')}" stop-opacity=".35"/><stop offset="1" stop-color="${T('acc')}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#ga)"/><path d="${path}" fill="none" stroke="${T('acc')}" stroke-width="2"/>
+    <g><rect x="${x(imax)-26}" y="${y(vals[imax])-24}" width="52" height="15" rx="7.5" fill="${T('ink')}"/><text x="${x(imax)}" y="${y(vals[imax])-13.5}" font-size="8.5" font-weight="800" fill="#fff" text-anchor="middle">PEAK</text></g>
+    ${months}${hol}${hits}</svg>`; };
+
+  const ch = P().channel.filter(c => c.channel_group).sort((a,b) => (b.r||0)-(a.r||0)).slice(0, 6);
+  const top = ch[0];
+  const k = P().kpi;
+  return `<div class="body" style="grid-template-columns:1.62fr 1fr;grid-template-rows:1fr 168px">
+    <div class="card" style="grid-row:span 2">
+      <div class="ct"><div><h3>Daily ${m==='r'?'revenue':m==='s'?'sessions':'conversion rate'}, Nov 1 – Jan 31</h3><p>Shaded band = peak season (Black Friday week to Christmas) · hover a day or a holiday marker</p></div>
+      <div class="tog" data-tog="p1metric">${[['r','Revenue'],['s','Sessions'],['cr','Conv. rate']].map(([v,t]) => `<button data-v="${v}" class="${m===v?'on':''}">${t}</button>`).join('')}</div></div>
+      <div class="fill">${slot('trend', trendSvg)}</div>
+      <div class="foot">Holiday window: the series is not a normal trend. ${sel?'Days outside the selected range are dimmed.':''} Best day: <b>${esc(k['Best Revenue Day'])}</b></div>
+      ${tag('Native line chart · Date[date] × [Revenue] / [Sessions] / [Conversion Rate] via field parameter · error band = Date[is_peak_season] · holiday markers = Date[holiday_name]')}
+    </div>
+    <div class="card">
+      <div class="ct"><div><h3>Revenue by channel</h3><p>${esc(top.channel_group)} carries ${fPct(k['Revenue Share of Top Channel'],0)} of revenue — a concentration risk</p></div><span class="pill acc">TOP ${fPct(k['Revenue Share of Top Channel'],0)}</span></div>
+      <div class="fill" style="display:flex;flex-direction:column;justify-content:space-around">${hbars(ch, {label:r=>r.channel_group, value:r=>r.r, fmt:fUsd, color:r=>r===top?T('acc'):T('acc3'),
+        sub:r=>`${fPct(r.rs,0)} of revenue · ${fPct(r.ss,0)} of sessions`, tipf:r=>`<b>${r.channel_group}</b><br>Revenue ${fUsd(r.r)} (${fPct(r.rs,1)})<br>Sessions ${fInt(r.s)} (${fPct(r.ss,1)})<br>Conversion ${fPct(r.cr)} · AOV ${fUsd2(r.aov)}`})}</div>
+      ${tag('Native bar chart · Channel[channel_group] × [Revenue] · conditional colour = [Channel Revenue Rank]=1 · subtitle = [Top Channel], [Revenue Share of Top Channel]')}
+    </div>
+    <div class="card insight">
+      <div class="lbl2">KEY INSIGHT · PEAK SEASON</div>
+      <div style="display:flex;gap:18px;align-items:flex-end;margin-top:8px">
+        <div><div class="big">${fPct(D.all.kpi['Peak Season Revenue Share'],0)}</div><div style="font-size:10.5px;color:#C9CAF5">of revenue in ${fPct(D.all.kpi['Peak Season Day Share'],0)} of the days</div></div>
+        <div><div class="big" style="color:${T('acc3')}">+${fPct(D.all.kpi['Peak Conversion Lift'],0)}</div><div style="font-size:10.5px;color:#C9CAF5">conversion lift vs off-peak days</div></div>
+      </div>
+      <div style="font-size:10.5px;line-height:1.5;color:#E3E4FF;margin-top:10px">In January revenue falls ${fPct(-D.jan.kpi['Revenue Δ%'],0)} but sessions only ${fPct(-D.jan.kpi['Sessions Δ%'],0)}: the visitors stay, the buyers leave.</div>
+      ${tag('HTML Content · [01 · 002 Key Insight HTML] from [Peak Season Revenue Share], [Peak Season Day Share], [Peak Conversion Lift] (full-window, REMOVEFILTERS on Date)')}
+    </div></div>`;
+}
+
+/* ================= PAGE 2 · ACQUISITION ================= */
+function page2(){
+  const k = P().kpi;
+  const ch = P().channel.filter(c => c.channel_group && c.s > 0).sort((a,b) => b.s - a.s);
+  const mxs = Math.max(...ch.map(c => Math.max(c.ss, c.rs)));
+  const rows = ch.map(c => {
+    const ix = c.ri || 0, good = ix >= 1;
+    return `<div data-tip="<b>${c.channel_group}</b><br>${fPct(c.ss,1)} of sessions → ${fPct(c.rs,1)} of revenue<br>Revenue index ${ix.toFixed(2)}× · Conversion ${fPct(c.cr)} (${(c.cvs>=0?'+':'')+(c.cvs||0).toFixed(2)} pts vs site)" style="display:grid;grid-template-columns:96px 1fr 1fr 56px;gap:8px;align-items:center;flex:1;border-bottom:1px solid #F2F3FA">
+      <div style="font-size:11px;font-weight:600">${c.channel_group}</div>
+      <div style="display:flex;justify-content:flex-end"><div style="height:12px;width:${c.ss/mxs*100}%;background:${T('acc3')};border-radius:6px 0 0 6px"></div></div>
+      <div><div style="height:12px;width:${c.rs/mxs*100}%;background:${T('acc')};border-radius:0 6px 6px 0"></div></div>
+      <div style="text-align:right"><span class="pill ${good?'good':'bad'}">${ix.toFixed(2)}×</span></div></div>`; }).join('');
+  const sm = P().srcmed.map(r => ({...r, src: r.session_source + ' / ' + r.session_medium,
+    _tip: `<b>${esc(r.session_source)} / ${esc(r.session_medium)}</b><br>${r.channel_group}<br>${fInt(r.s)} sessions · ${fUsd(r.r)}<br>Conversion ${fPct(r.cr)} · ${fUsd2(r.rps)} per session`}));
+  const mxr = Math.max(...sm.map(r => r.rps || 0));
+  const dev = P().device.slice().sort((a,b) => b.s - a.s);
+  return `<div class="body" style="grid-template-columns:1fr 1.25fr;grid-template-rows:1fr 150px">
+    <div class="card">
+      <div class="ct"><div><h3>Traffic share vs revenue share</h3><p>Left = share of sessions · right = share of revenue · chip = revenue index</p></div></div>
+      <div style="display:grid;grid-template-columns:96px 1fr 1fr 56px;gap:8px;font-size:9.5px;font-weight:700;color:${T('sub')};letter-spacing:.8px;margin-top:10px"><div>CHANNEL</div><div style="text-align:right">SESSIONS ◂</div><div>▸ REVENUE</div><div style="text-align:right">INDEX</div></div>
+      <div class="fill" style="margin-top:2px;display:flex;flex-direction:column">${rows}</div>
+      <div class="foot">Index above 1× = the channel earns more than the traffic it brings. Email is tiny (${fInt(ch.find(c=>c.channel_group==='Email')?.s)} sessions) but converts at ${fPct(ch.find(c=>c.channel_group==='Email')?.cr,1)}.</div>
+      ${tag('Native clustered bar (mirrored) or Deneb · Channel × [Session Share] / [Revenue Share] · chip = [Revenue Index] with conditional colour')}
+    </div>
+    <div class="card">
+      <div class="ct"><div><h3>Top sources by sessions</h3><p>Click a header to sort · the store's own domain shows up as a "referrer"</p></div></div>
+      <div class="fill" style="overflow:auto">${sortTable('src', sm, [
+        {k:'src',h:'SOURCE / MEDIUM',f:r=>`<span class="trunc" style="max-width:150px">${esc(r.src)}</span>${r.session_source==='shop.googlemerchandisestore.com'?' <span class="pill warn">SELF-REF</span>':''}`},
+        {k:'s',h:'SESSIONS',f:r=>fInt(r.s)},{k:'r',h:'REVENUE',f:r=>fUsd(r.r)},
+        {k:'rps',h:'REV / SESSION',f:r=>`${fUsd2(r.rps)}<span class="bar" style="width:${(r.rps||0)/mxr*30}px"></span>`}], 's')}</div>
+      ${tag('Native table · Sessions[session_source], [session_medium] · [Sessions] [Conversion Rate] [Revenue] [Revenue per Session] (data bars) [Revenue Index] · icon rule for self-referral')}
+    </div>
+    <div class="card">
+      <div class="ct"><div><h3>Device split</h3><p>Share of sessions and conversion by device</p></div></div>
+      <div class="fill" style="display:flex;gap:10px;align-items:stretch">${dev.map(d => `<div data-tip="<b>${d.device_category}</b><br>${fInt(d.s)} sessions · ${fUsd(d.r)}<br>Conversion ${fPct(d.cr)} · ${fUsd2(d.rps)} / session" style="flex:${Math.max(d.ss,.12)};background:${T('soft')};border-radius:10px;padding:10px;display:flex;flex-direction:column;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:${T('sub')};text-transform:uppercase">${d.device_category}</div>
+        <div style="font-size:20px;font-weight:800;color:${T('acc')}">${fPct(d.ss,0)}</div><div style="font-size:10px;color:${T('sub')}">CR ${fPct(d.cr)}</div></div>`).join('')}</div>
+      ${tag('Native 100% bar or HTML · Device × [Session Share], [Conversion Rate]')}
+    </div>
+    <div class="card insight">
+      <div class="lbl2">ATTRIBUTION CHECK</div>
+      <div style="display:flex;gap:16px;align-items:flex-end;margin-top:6px"><div class="big">${fPct(k['Self-Referral Revenue Share'],0)}</div>
+      <div style="font-size:11px;line-height:1.55;color:#E3E4FF">of revenue (${fUsd(k['Self-Referral Revenue'])}) is credited to the store’s own domain, a checkout redirect rather than a partner. Read Referral’s lead with caution.</div></div>
+      ${tag('HTML Content · [02 · 002 Attribution Check HTML] · [Self-Referral Revenue Share] [Self-Referral Revenue] [Event Param Attribution Share]')}
+    </div></div>`;
+}
+
+/* ================= PAGE 3 · CONTENT ================= */
+function page3(){
+  const k = P().kpi;
+  let lp = P().landing.filter(l => l.page_path && l.s > 0);
+  const types = ['all', ...new Set(lp.map(l => l.page_type))];
+  if (S.p3type !== 'all') lp = lp.filter(l => l.page_type === S.p3type);
+  const quadSvg = (W, H) => { const pl = 40, pr = 12, pt = 14, pb = 28;
+  const xs = lp.map(l => Math.log10(l.s)), xmin = Math.min(2.5, ...xs), xmax = Math.max(...xs) + .1;
+  const ymax = Math.max(2.2, ...lp.map(l => l.ix || 0)) * 1.05;
+  const X = v => pl + (Math.log10(v) - xmin) / (xmax - xmin) * (W - pl - pr), Y = v => pt + (1 - v / ymax) * (H - pt - pb);
+  const share2 = lp.length ? null : null;
+  const sThresh = (P().pagetype.reduce((a,b)=>a+(b.s||0),0)) * 0.02;
+  const ROLE = {'Earner':T('acc'),'Attractor':T('bad'),'Hidden gem':T('good'),'Long tail':T('muted')};
+  const mr = Math.max(...lp.map(l => l.r || 0)) || 1;
+  const dots = lp.map(l => `<circle cx="${X(l.s)}" cy="${Y(l.ix||0)}" r="${4 + Math.sqrt((l.r||0)/mr)*14}" fill="${ROLE[l.role]||T('muted')}" fill-opacity=".55" stroke="${ROLE[l.role]||T('muted')}" data-tip="<b>${esc(l.page_path)}</b><br>${l.role} · ${l.page_type}<br>${fInt(l.s)} sessions (${fPct(l.ss,1)}) · ${fUsd(l.r)}<br>${fUsd2(l.rps)} / session · index ${(l.ix||0).toFixed(2)}× · CR ${fPct(l.cr)}"/>`).join('');
+  const qx = X(sThresh), qy = Y(1);
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+    <rect x="${qx}" y="${pt}" width="${W-pr-qx}" height="${qy-pt}" fill="${T('soft')}"/><rect x="${qx}" y="${qy}" width="${W-pr-qx}" height="${H-pb-qy}" fill="#FDF0F0"/>
+    <line x1="${pl}" x2="${W-pr}" y1="${qy}" y2="${qy}" stroke="${T('acc3')}" stroke-dasharray="3 3"/><line x1="${qx}" x2="${qx}" y1="${pt}" y2="${H-pb}" stroke="${T('acc3')}" stroke-dasharray="3 3"/>
+    <text x="${W-pr-6}" y="${pt+12}" text-anchor="end" font-size="9.5" font-weight="800" fill="${T('acc')}">EARNERS</text>
+    <text x="${W-pr-6}" y="${H-pb-6}" text-anchor="end" font-size="9.5" font-weight="800" fill="${T('bad')}">ATTRACTORS</text>
+    <text x="${pl+6}" y="${pt+12}" font-size="9.5" font-weight="800" fill="${T('good')}">HIDDEN GEMS</text>
+    <text x="${pl+6}" y="${H-pb-6}" font-size="9.5" font-weight="800" fill="${T('muted')}">LONG TAIL</text>
+    <text x="${pl-6}" y="${qy+3}" font-size="9" text-anchor="end" fill="${T('sub')}">1.0×</text>
+    <text x="${(pl+W)/2}" y="${H-6}" font-size="9.5" text-anchor="middle" fill="${T('sub')}">Landing sessions (log scale) · line = 2% of sessions</text>
+    <text x="10" y="${(pt+H)/2}" font-size="9.5" fill="${T('sub')}" transform="rotate(-90 10 ${(pt+H)/2})" text-anchor="middle">Revenue / session index</text>${dots}</svg>`; };
+  const pt3 = P().pagetype.filter(p => p.page_type).sort((a,b) => b.s - a.s);
+  const mxsh = Math.max(...pt3.map(p => Math.max(p.ss||0, p.rs||0)));
+  const tbl = lp.map(l => ({...l, _tip:`<b>${esc(l.page_path)}</b><br>${l.role}: ${fPct(l.ss,1)} of landing sessions at ${(l.ix||0).toFixed(2)}× the average yield`}));
+  return `<div class="body" style="grid-template-columns:1fr 1.1fr;grid-template-rows:1fr 150px">
+    <div class="card">
+      <div class="ct"><div><h3>Landing pages: traffic vs yield</h3><p>Bubble = revenue · above the line earns more per session than average</p></div></div>
+      <div class="chips" style="margin-top:8px" data-chip="p3type">${types.map(t => `<button data-v="${t}" class="${S.p3type===t?'on':''}">${t}</button>`).join('')}</div>
+      <div class="fill">${slot('quad', quadSvg)}</div>
+      ${tag('Native scatter · Page Type[page_path] · X [Sessions] (log) · Y [Landing RPS Index] · size [Revenue] · legend [Landing Page Role] · chips = Page Type[page_type] slicer')}
+    </div>
+    <div class="card">
+      <div class="ct"><div><h3>Top landing pages</h3><p>Role: traffic ≥ 2% of landing sessions, yield vs the selection average</p></div></div>
+      <div class="fill" style="overflow:auto">${sortTable('lp', tbl, [
+        {k:'page_path',h:'LANDING PAGE',f:r=>`<span class="trunc" style="max-width:190px">${esc(r.page_path)}</span>`},
+        {k:'role',h:'ROLE',f:r=>`<span class="pill ${{'Earner':'acc','Attractor':'bad','Hidden gem':'good'}[r.role]||'mute'}">${r.role}</span>`},
+        {k:'s',h:'SESSIONS',f:r=>fInt(r.s)},{k:'rps',h:'REV / SES.',f:r=>fUsd2(r.rps)},
+        {k:'ix',h:'INDEX',f:r=>`${(r.ix||0).toFixed(2)}×<span class="bar" style="width:${Math.min((r.ix||0)/3,1)*40}px;background:${(r.ix||0)>=1?T('acc'):T('bad')}"></span>`}], 's')}</div>
+      ${tag('Native table · [Landing Page Role] as icon/background rule · [Landing RPS Index] data bar')}
+    </div>
+    <div class="card" style="grid-column:span 2">
+      <div class="ct"><div><h3>By page type</h3><p>Share of landing sessions (light) vs share of revenue (dark)</p></div><div class="legend"><span><i style="background:${T('acc3')}"></i>Sessions</span><span><i style="background:${T('acc')}"></i>Revenue</span></div></div>
+      <div class="fill" style="display:flex;gap:10px;align-items:flex-end">${pt3.map(p => `<div data-tip="<b>${p.page_type}</b><br>${fPct(p.ss,1)} of sessions · ${fPct(p.rs,1)} of revenue<br>${fUsd2(p.rps)} / session · CR ${fPct(p.cr)}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%">
+        <div style="flex:1;width:100%;display:flex;gap:3px;align-items:flex-end;justify-content:center"><div style="width:16px;height:${(p.ss||0)/mxsh*100}%;background:${T('acc3')};border-radius:4px 4px 0 0"></div><div style="width:16px;height:${(p.rs||0)/mxsh*100}%;background:${T('acc')};border-radius:4px 4px 0 0"></div></div>
+        <div style="font-size:9.5px;font-weight:700;color:${T('sub')};text-transform:capitalize">${p.page_type}</div></div>`).join('')}</div>
+      ${tag('Native clustered column · Page Type[page_type] × [Landing Session Share], [Landing Revenue Share]')}
+    </div></div>`;
+}
+
+/* ================= PAGE 4 · FUNNEL ================= */
+function page4(){
+  const k = P().kpi;
+  const src = S.p4dim === 'all' ? P().funnel : P().device.find(d => d.device_category === S.p4dim);
+  const steps = [['Viewed a product','vi'],['Added to cart','atc'],['Began checkout','bc'],['Added payment','api'],['Purchased','ps']];
+  const top = src.vi || 1;
+  const rates = steps.map(([,s],i) => i ? (src[s] / src[steps[i-1][1]]) : 1);
+  const minR = Math.min(...rates.slice(1)), leak = rates.indexOf(minR);
+  const funnel = steps.map(([lab,s],i) => `<div data-tip="<b>${lab}</b><br>${fInt(src[s])} sessions${i?`<br>${fPct(rates[i],1)} of the previous step<br>${fInt(src[steps[i-1][1]]-src[s])} sessions lost here`:''}" style="display:grid;grid-template-columns:112px 1fr 62px 52px;gap:10px;align-items:center;flex:1">
+      <div style="font-size:11.5px;font-weight:600">${lab}</div>
+      <div style="height:100%;max-height:34px;background:${T('soft')};border-radius:9px;overflow:hidden;display:flex;justify-content:center"><div style="height:100%;width:${Math.max(src[s]/top*100,1.5)}%;background:${i===leak?T('bad'):T('acc')};border-radius:9px;transition:width .4s"></div></div>
+      <div style="font-size:12px;font-weight:800;text-align:right">${src[s].toLocaleString('en-US')}</div>
+      <div style="font-size:11px;font-weight:700;text-align:right;color:${i===leak?T('bad'):T('sub')}">${i?fPct(rates[i],1):'100%'}</div></div>`).join('');
+  const ch = P().funnel_ch.filter(c => c.channel_group && c.vi > 50).sort((a,b) => b.vi - a.vi);
+  const stepR = [['View→Cart','vi','atc'],['Cart→Chk','atc','bc'],['Chk→Pay','bc','api'],['Pay→Buy','api','ps']];
+  const heat = (v, base) => { const r = Math.max(0, Math.min(1, v)); return `rgba(91,91,214,${(.08 + r*.85).toFixed(2)})`; };
+  const hm = `<table style="font-size:10px"><thead><tr><th>CHANNEL</th>${stepR.map(s => `<th>${s[0].toUpperCase()}</th>`).join('')}</tr></thead><tbody>${ch.map(c => `<tr><td style="font-weight:600">${c.channel_group}</td>${stepR.map(([n,a,b],j) => { const v = c[b]/c[a]; const norm = j===4 ? v/0.15 : v; return `<td data-tip="<b>${c.channel_group}</b> · ${n}<br>${fInt(c[b])} of ${fInt(c[a])} sessions = ${fPct(v,1)}" style="text-align:center;padding:3px 2px"><span style="display:block;padding:4px 0;border-radius:6px;background:${heat(norm)};color:${norm>.55?'#fff':T('ink')};font-weight:700">${fPct(v,1)}</span></td>`; }).join('')}</tr>`).join('')}</tbody></table>`;
+  const lost = [['View → Cart', src.vi-src.atc],['Cart → Checkout', src.atc-src.bc],['Checkout → Payment', src.bc-src.api],['Payment → Purchase', src.api-src.ps]];
+  return `<div class="body" style="grid-template-columns:1.1fr 1fr;grid-template-rows:1fr 150px">
+    <div class="card" style="grid-row:span 2">
+      <div class="ct"><div><h3>Purchase funnel</h3><p>Sessions reaching each step · % = step-to-step rate · red = biggest leak</p></div>
+      <div class="tog" data-tog="p4dim">${['all','desktop','mobile','tablet'].map(v => `<button data-v="${v}" class="${S.p4dim===v?'on':''}">${v==='all'?'All':v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div></div>
+      <div class="fill" style="display:flex;flex-direction:column;gap:8px;padding:6px 0">${funnel}</div>
+      <div style="display:flex;gap:10px;margin-top:8px">${lost.map(([n,v],i) => `<div style="flex:1;background:${i+1===leak?'#FDE8E8':T('soft')};border-radius:10px;padding:8px 10px"><div style="font-size:9px;font-weight:700;letter-spacing:.8px;color:${i+1===leak?T('bad'):T('sub')}">LOST · ${n.toUpperCase()}</div><div style="font-size:16px;font-weight:800;color:${i+1===leak?T('bad'):T('ink')}">${fInt(v)}</div></div>`).join('')}</div>
+      <div class="foot">${esc(k['Cart Window Note'] || 'All steps counted from Nov 25, when add_to_cart tracking starts in the GA4 sample.')}</div>
+      ${tag('HTML Content · [04 · 002 Funnel HTML] (cart-tracked window) · device buttons = native Device slicer (tiles) · lost cards = [Lost at …] measures')}
+    </div>
+    <div class="card">
+      <div class="ct"><div><h3>Step rates by channel</h3><p>Darker = higher pass-through · View→Buy scaled to 15%</p></div></div>
+      <div class="fill" style="overflow:auto">${hm}</div>
+      ${tag('Native matrix · Channel × step-rate measures · background colour scale (soft → accent)')}
+    </div>
+    <div class="card insight">
+      <div class="lbl2">WHERE TO ACT</div>
+      <div style="display:flex;gap:16px;align-items:flex-end;margin-top:6px"><div class="big">${fPct(k['Session to View Item Rate'],0)}</div>
+      <div style="font-size:10.5px;line-height:1.5;color:#E3E4FF">of sessions ever open a product page. Fixing view → cart helps the ${fPct(k['Session to View Item Rate'],0)}; getting more visitors to a product page widens the whole funnel. ${(() => { const c = P().funnel_ch.filter(x => x.channel_group && x.vi > 500).map(x => ({n:x.channel_group, r:x.ps/x.vi})).sort((a,b)=>b.r-a.r); return c.length>1 ? `${c[0].n} turns ${fPct(c[0].r,1)} of viewers into buyers vs ${fPct(c[c.length-1].r,1)} for ${c[c.length-1].n}.` : ''; })()}</div></div>
+      ${tag('HTML Content · [04 · 003 Where To Act HTML] · [Session to View Item Rate], best/worst channel by [View Item to Purchase Rate]')}
+    </div></div>`;
+}
+
+/* ================= PAGE 5 · PRODUCTS ================= */
+function page5(){
+  const k = P().kpi;
+  const it = P().items.filter(i => i.item_name).sort((a,b) => b.r - a.r).slice(0, 10);
+  const cat = P().category.filter(c => c.item_category).sort((a,b) => b.r - a.r).slice(0, 8);
+  const par = P().pareto, n = par.n, cv = par.curve;
+  const half = k['Items for Half of Revenue'];
+  const paretoSvg = (W, H) => { const pl = 30, pr = 8, pt = 10, pb = 22;
+  const X = i => pl + i / (cv.length - 1) * (W - pl - pr), Y = v => pt + (1 - v) * (H - pt - pb);
+  const hx = pl + (half / n) * (W - pl - pr);
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">
+    <line x1="${pl}" x2="${W-pr}" y1="${Y(.5)}" y2="${Y(.5)}" stroke="${T('acc3')}" stroke-dasharray="3 3"/>
+    <line x1="${hx}" x2="${hx}" y1="${Y(.5)}" y2="${H-pb}" stroke="${T('acc')}" stroke-dasharray="3 3"/>
+    <path d="M${X(0)},${Y(0)}${cv.map((v,i) => 'L'+X(i).toFixed(1)+','+Y(v).toFixed(1)).join('')}L${X(cv.length-1)},${H-pb}L${X(0)},${H-pb}Z" fill="${T('acc')}" fill-opacity=".12"/>
+    <path d="M${X(0)},${Y(0)}${cv.map((v,i) => 'L'+X(i).toFixed(1)+','+Y(v).toFixed(1)).join('')}" fill="none" stroke="${T('acc')}" stroke-width="2"/>
+    <circle cx="${hx}" cy="${Y(.5)}" r="4.5" fill="${T('acc')}" stroke="#fff" stroke-width="2"/>
+    <text x="${hx+7}" y="${Y(.5)+14}" font-size="9.5" font-weight="800" fill="${T('ink')}">${half} items = 50%</text>
+    <text x="${pl-5}" y="${Y(.5)+3}" font-size="9" text-anchor="end" fill="${T('sub')}">50%</text><text x="${pl-5}" y="${Y(1)+3}" font-size="9" text-anchor="end" fill="${T('sub')}">100%</text>
+    <text x="${(pl+W)/2}" y="${H-5}" font-size="9" text-anchor="middle" fill="${T('sub')}">${n} items sold, best first</text></svg>`; };
+  const mxc = Math.max(...cat.map(c => c.r));
+  return `<div class="body" style="grid-template-columns:1.25fr 1fr 0.9fr;grid-template-rows:1fr 120px">
+    <div class="card" style="grid-row:span 2">
+      <div class="ct"><div><h3>Top 10 items by revenue</h3><p>Bar = item revenue · line below = units × avg price · ${esc(k['Top Item'])} leads</p></div></div>
+      <div class="fill" style="overflow:auto">${sortTable('it', it.map((r,i) => ({...r, rank:i+1, _tip:`<b>${esc(r.item_name)}</b><br>${r.item_category}<br>${fUsd(r.r)} · ${fInt(r.u)} units at ${fUsd2(r.p)}<br>${fPct(r.sh,2)} of item revenue`})), [
+        {k:'rank',h:'#',f:r=>`<span style="color:${T('muted')};font-weight:700">${r.rank}</span>`},
+        {k:'item_name',h:'ITEM',f:r=>`<span class="trunc" style="max-width:170px;text-align:left;display:block">${esc(r.item_name)}</span>`},
+        {k:'r',h:'REVENUE',f:r=>`${fUsd(r.r)}<span class="bar" style="width:${r.r/it[0].r*34}px"></span>`},
+        {k:'u',h:'UNITS',f:r=>fInt(r.u)},{k:'p',h:'AVG PRICE',f:r=>fUsd2(r.p)}], 'r')}</div>
+      <div class="foot">Ten items = ${fPct(k['Top 10 Item Revenue Share'],0)} of item revenue: the catalogue is broad, not hit-driven.</div>
+      ${tag('Native table · Items Daily[item_name] · [Item Revenue Rank] [Item Revenue] (data bar) [Units Purchased] [Avg Item Price] [Item Revenue Share] · Top N filter = 10 by [Item Revenue]')}
+    </div>
+    <div class="card">
+      <div class="ct"><div><h3>Revenue by category</h3><p>${esc(k['Top Category'])} is ${fPct(k['Top Category Revenue Share'],0)} of item revenue</p></div></div>
+      <div class="fill" style="display:flex;flex-direction:column;justify-content:space-around">${hbars(cat, {label:c=>c.item_category, value:c=>c.r, fmt:fUsd, color:(c)=>c===cat[0]?T('acc'):T('acc3'), max:mxc,
+        sub:c=>`${fInt(c.u)} units · ${fUsd2(c.p)} avg`, tipf:c=>`<b>${c.item_category}</b><br>${fUsd(c.r)} (${fPct(c.sh,1)})<br>${fInt(c.u)} units at ${fUsd2(c.p)}`})}</div>
+      ${tag('Native bar · Items Daily[item_category] × [Item Revenue] · Top N = 8')}
+    </div>
+    <div class="card">
+      <div class="ct"><div><h3>Revenue concentration</h3><p>Cumulative share of item revenue</p></div></div>
+      <div class="fill">${slot('pareto', paretoSvg)}</div>
+      ${tag('HTML Content · [05 · 002 Pareto HTML] fed by [Items for Half of Revenue] + cumulative series')}
+    </div>
+    <div class="card" style="grid-column:span 2;background:#FFF9EC;box-shadow:none;border:1px solid #F5DDA6">
+      <div style="display:flex;gap:14px;align-items:center;height:100%">
+        <span class="pill warn" style="font-size:11px">DATA NOTE</span>
+        <div style="font-size:11px;line-height:1.55;color:#7C4A03">Item-level views are under-counted in gold: add-to-carts (37,262) exceed item views (27,585), so the deployed <b>Add-to-Cart Rate</b> reads 135%. This page uses revenue, units and price only until <code>nb_gold_ga4_marketing</code> keeps <code>view_item</code> rows with a null quantity. Session-level funnel (page 4) is unaffected.</div>
+      </div>
+      ${tag('Text box bound to [Item Data Check] (blank once the gold fix lands)')}
+    </div></div>`;
+}
+
+/* ================= PAGE 0 · WELCOME (cover) ================= */
+const LINKS = {li:'https://www.linkedin.com/in/patriciorioscanepa', dp:'https://data-pat-ai.netlify.app/'};
+const ICON = {
+  1:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>', 2:'<circle cx="12" cy="12" r="9"/><path d="M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M3 12h18"/>',
+  3:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>', 4:'<path d="M3 4h18l-7 8v6l-4 2v-8z"/>',
+  5:'<path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/>', 6:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+function heroScene(){
+  const W = 1280, H = 720, vx = 640, hz = 500;
+  const raw = D.daily.filter(d => d.date), days = raw.map((d,i) => { const w = raw.slice(Math.max(0,i-2), i+1); return {r: w.reduce((a,b) => a + (b.r||0), 0) / w.length}; }), mx = Math.max(...days.map(d => d.r || 0));
+  // perspective floor
+  let floor = '';
+  for (let i = -14; i <= 14; i++) floor += `<line x1="${vx + i*14}" y1="${hz}" x2="${vx + i*120}" y2="${H}" />`;
+  for (let k = 1; k <= 9; k++) { const t = Math.pow(k/9, 1.9), y = hz + t*(H-hz); floor += `<line x1="0" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke-opacity="${(.15 + t*.5).toFixed(2)}"/>`; }
+  // weekly sessions as a wireframe skyline on the horizon
+  const wk = D.all.weekly.filter(w => w.week_start && w.days === 7), ms = Math.max(...wk.map(w => w.s));
+  const bw = 46, x0 = vx - (wk.length * (bw + 10)) / 2;
+  const bars = wk.map((w,i) => { const h = 22 + (w.s/ms) * 70; return `<rect class="hx-bar" x="${x0 + i*(bw+10)}" y="${hz - h}" width="${bw}" height="${h}" style="animation-delay:${.15 + i*.06}s"/>`; }).join('');
+  // revenue curve as a light trail across the floor
+  const X = i => 90 + i * (W - 180) / (days.length - 1), Y = v => 600 - (v / mx) * 150;
+  const pts = days.map((d,i) => [X(i), Y(d.r || 0)]);
+  const path = pts.map(([x,y],i) => (i ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1)).join('');
+  const ip = days.reduce((b,d,i) => (d.r||0) > (days[b].r||0) ? i : b, 0), [px, py] = pts[ip];
+  // particles rising near the peak season
+  let parts = ''; const rnd = (n => () => (n = (n * 9301 + 49297) % 233280) / 233280)(7);
+  for (let i = 0; i < 34; i++) { const x = 200 + rnd()*880, y = 470 + rnd()*150, r = .8 + rnd()*1.8;
+    parts += `<circle class="hx-pt" cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(1)}" style="animation-duration:${(5 + rnd()*7).toFixed(1)}s;animation-delay:${(rnd()*6).toFixed(1)}s"/>`; }
+  return `<svg class="hx-scene" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">
+    <defs><filter id="hxg" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <linearGradient id="hxc" x1="0" x2="1"><stop offset="0" stop-color="#8B8CF0" stop-opacity=".2"/><stop offset=".35" stop-color="#A5A6FF"/><stop offset=".62" stop-color="#C7C8F7"/><stop offset="1" stop-color="#8B8CF0" stop-opacity=".35"/></linearGradient>
+      <linearGradient id="hxf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B8CF0" stop-opacity="0"/><stop offset="1" stop-color="#8B8CF0" stop-opacity=".9"/></linearGradient></defs>
+    <g stroke="url(#hxf)" stroke-width="1" fill="none" opacity=".45">${floor}</g>
+    <g fill="rgba(139,140,240,.04)" stroke="rgba(167,168,255,.16)" stroke-width="1">${bars}</g>
+    <path d="M-40,690 C160,560 260,720 470,610 S760,520 1320,560" fill="none" stroke="#5BD6B0" stroke-opacity=".35" stroke-width="1.6" class="hx-wave"/>
+    <path d="M-40,712 C180,600 300,740 520,640 S820,560 1320,600" fill="none" stroke="#8B8CF0" stroke-opacity=".35" stroke-width="1.2" class="hx-wave" style="animation-duration:13s"/>
+    <path d="${path}" fill="none" stroke="#8B8CF0" stroke-width="9" stroke-opacity=".18" filter="url(#hxg)" class="hx-curve"/>
+    <path d="${path}" fill="none" stroke="url(#hxc)" stroke-width="2.2" filter="url(#hxg)" class="hx-curve"/>
+    <g fill="#C7C8F7">${parts}</g>
+    <circle cx="${px}" cy="${py}" r="9" fill="none" stroke="#C7C8F7" stroke-width="1.5" class="hx-pulse"/>
+    <circle cx="${px}" cy="${py}" r="3.5" fill="#fff" opacity="0" style="animation:fadeSimple .6s ease 3.3s forwards" filter="url(#hxg)"/>
+  </svg>`;
+}
+function cover(){
+  return `<div class="hx-tex"></div><div class="hx-glow"></div>${heroScene()}<div class="hx-dim"></div>
+  <div class="hx-top"><div class="hx-mark"><i>DP</i>DATAPAT.AI</div>
+    <div class="hx-acts"><button id="cvHow">? HOW TO READ</button><a href="${LINKS.li}" target="_blank" rel="noopener"><svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM10 9h3.8v1.7h.1c.5-1 1.8-2 3.8-2 4 0 4.8 2.6 4.8 6V21h-4v-5.6c0-1.3 0-3-1.9-3s-2.1 1.4-2.1 2.9V21h-4z"/></svg>CONNECT LINKEDIN ›</a></div></div>
+  <div class="hx-center">
+    <div class="hx-eb rv" style="animation-delay:3s">DATAPAT.AI PRESENTS</div>
+    <h1 class="hx-title rv-t" style="animation-delay:3.2s">From Click to Checkout</h1>
+    <div class="hx-sub rv" style="animation-delay:3.7s">GA4 marketing performance: acquisition, engagement, funnel and revenue for the Google Merchandise Store</div>
+    <div class="hx-event rv" style="animation-delay:4s">NOV 2020 — JAN 2021 · GA4 SAMPLE · <span>BUILT ON MICROSOFT FABRIC</span></div>
+  </div>
+  <div class="hx-sig"><b>DataPat.ai</b><small>PATRICIO RIOS</small></div>
+  <div class="hx-band"><small>SELECT AN AREA TO EXPLORE</small>
+    <div class="hx-btns">${PAGES.slice(1).map((p,i) => `<button data-go="${i+1}"><svg viewBox="0 0 24 24">${ICON[i+1]}</svg>${p.nav.replace(' & Landing','')}</button>`).join('')}</div></div>
+  ${tag('HTML Content · [00 · 001 Cover HTML] · animated SVG scene fed by daily [Revenue] and weekly [Sessions] · page buttons = native page-navigation buttons layered on top')}`;
+}
+function page0(){ return ''; }
+
+/* ---------------- how-to-read content ---------------- */
+const HOWTO = [
+  ['Welcome', [['Watch the line','The glowing trail is daily revenue for the 92 days (3-day average); it peaks between Black Friday and Christmas. The faint towers are weekly sessions.'],['Pick an area','The buttons along the bottom open each page.'],['Come back any time','Welcome is always first in the page list.']]],
+  ['Overview', [['Read the headline','It states the finding for the selected window; the KPI strip proves it.'],['Change the window','Full, Nov, Dec or Jan. Deltas compare with the previous month (or the same number of days before).'],['Hover the trend','Holiday markers show Black Friday, Cyber Monday, Christmas and New Year.'],['Watch concentration','The channel card flags when one channel carries most of the revenue.']]],
+  ['Acquisition', [['Compare the two bars','Light = share of sessions, dark = share of revenue for the same channel.'],['Use the index chip','Above 1× earns more than its traffic; below 1× brings visits that do not buy.'],['Sort the table','Click any header. SELF-REF marks the store’s own domain posing as a referrer.']]],
+  ['Content', [['Find the quadrant','Top-right earns, bottom-right attracts traffic that does not buy, top-left are hidden gems.'],['Filter by page type','Chips map to the native Page Type slicer.'],['Bubble size','Revenue landed by that page.']]],
+  ['Funnel', [['Follow the bars','Each bar is sessions that reached the step; the % is pass-through from the previous step.'],['Red = leak','The step with the lowest pass-through.'],['Switch device','Compare desktop, mobile and tablet funnels.'],['Mind the window','Cart steps start Nov 25, when add_to_cart tracking begins.']]],
+  ['Products', [['Rank','Top 10 items by revenue; click a header to re-sort.'],['Categories','Where the revenue sits by catalogue section.'],['Concentration','How many items it takes to reach half the revenue.'],['Data note','Item views are not used until the gold fix lands.']]],
+  ['Time Intelligence', [['Read the two lines','Solid = 7-day average, dashed = 28-day average. Solid above dashed means the business is speeding up.'],['Check the pacing','Each line is one month added up day by day. The selected month is solid, the month before is dashed.'],['Scan the weeks','Each week vs the 7 days before. Faded rows have fewer than 7 days in the window.'],['Use the weekday bars','Above 1.0× earns more than a typical day. There is no year-over-year: the sample is 92 days.']]],
+];
+
+/* ================= PAGE 6 · TIME INTELLIGENCE ================= */
+function page6(){
+  const k = P().kpi, m = S.p6metric || 'r', {s: rs, e: re} = S.range;
+  const td = D.ti_daily.filter(r => r.date).map(r => ({...r, d: r.date.slice(0,10)}));
+  const fm = m === 'r' ? fUsd : fInt;
+  const rollSvg = (W, H) => { const pl = 42, pr = 12, pt = 26, pb = 22;
+    const vals = td.map(r => (DAYMAP[r.d] || {})[m] ?? 0), a7 = td.map(r => r[m+'7']), a28 = td.map(r => r[m+'28']);
+    const mx = Math.max(...vals) * 1.06, n = td.length;
+    const x = i => pl + i * (W - pl - pr) / (n - 1), y = v => pt + (1 - v / mx) * (H - pt - pb), bw = (W - pl - pr) / n * .7;
+    const line = arr => arr.map((v,i) => nz(v) ? '' : `${(i && !nz(arr[i-1])) ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+    let grid = ''; for (let g = 0; g <= 3; g++) { const gv = mx * g / 3; grid += `<line x1="${pl}" x2="${W-pr}" y1="${y(gv)}" y2="${y(gv)}" stroke="${T('line')}"/><text x="${pl-8}" y="${y(gv)+3}" font-size="9.5" fill="${T('muted')}" text-anchor="end">${fInt(gv)}</text>`; }
+    const inSel = r => r.d >= rs && r.d <= re;
+    const bars = td.map((r,i) => `<rect x="${x(i)-bw/2}" y="${y(vals[i])}" width="${bw}" height="${H-pb-y(vals[i])}" rx="1.5" fill="${T('acc3')}" fill-opacity="${inSel(r)?.8:.22}"/>`).join('');
+    const last = td.map((r,i) => r.d <= re ? i : -1).filter(i => i >= 0).pop();
+    const months = [['Nov',0],['Dec',30],['Jan',61]].map(([t,i]) => `<text x="${x(i)}" y="${H-5}" font-size="10" fill="${T('sub')}" font-weight="600">${t}</text>`).join('');
+    const hits = td.map((r,i) => `<rect x="${x(i)-bw/2-1}" y="${pt}" width="${bw+2}" height="${H-pt-pb}" fill="transparent" data-tip="<b>${sd(r.d)}</b><br>Day ${fm(vals[i])}<br>7-day avg ${fm(a7[i])}<br>28-day avg ${fm(a28[i])}"/>`).join('');
+    const e7 = a7[last], e28 = a28[last], mom = nz(e28) ? null : (e7 - e28) / e28;
+    const lx = Math.max(pl + 64, Math.min(x(last), W - pr - 64));
+    const callout = nz(e7) ? '' : `<g><line x1="${x(last)}" x2="${x(last)}" y1="${pt}" y2="${H-pb}" stroke="${T('ink')}" stroke-dasharray="2 3" stroke-opacity=".5"/>
+      <rect x="${lx-62}" y="${pt-22}" width="124" height="18" rx="9" fill="${T('ink')}"/>
+      <text x="${lx}" y="${pt-9.5}" font-size="9.5" font-weight="800" fill="#fff" text-anchor="middle">${nz(mom)?'7D AVG '+fm(e7):'7D vs 28D  '+(mom>=0?'+':'−')+fPct(Math.abs(mom),0)}</text></g>`;
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${grid}${bars}
+      <path d="${line(a28)}" fill="none" stroke="${T('ink')}" stroke-width="1.6" stroke-dasharray="5 4" stroke-opacity=".7"/>
+      <path d="${line(a7)}" fill="none" stroke="${T('acc')}" stroke-width="2.4"/>${months}${callout}${hits}</svg>`; };
+
+  const months3 = [['2020-11','Nov'],['2020-12','Dec'],['2021-01','Jan']];
+  const focus = re.slice(0,7), prevYm = {'2020-12':'2020-11','2021-01':'2020-12'}[focus];
+  const mk = m === 'r' ? 'rmtd' : 'smtd', mname = y => months3.find(z => z[0] === y)[1];
+  const paceSvg = (W, H) => { const pl = 42, pr = 36, pt = 10, pb = 22;
+    const ser = months3.map(([y,t]) => [y, t, td.filter(r => r.year_month === y)]);
+    const mx = Math.max(...td.map(r => r[mk] || 0)) * 1.05;
+    const x = d => pl + (d - 1) / 30 * (W - pl - pr), y = v => pt + (1 - v / mx) * (H - pt - pb);
+    let grid = ''; for (let g = 0; g <= 3; g++) { const gv = mx * g / 3; grid += `<line x1="${pl}" x2="${W-pr}" y1="${y(gv)}" y2="${y(gv)}" stroke="${T('line')}"/><text x="${pl-8}" y="${y(gv)+3}" font-size="9.5" fill="${T('muted')}" text-anchor="end">${fInt(gv)}</text>`; }
+    const col = yy => yy === focus ? T('acc') : yy === prevYm ? T('ink') : T('acc3');
+    const ends = ser.map(([yy,t,rs2]) => ({yy, t, ly: y(rs2[rs2.length-1][mk]) + 3})).sort((p,q) => p.ly - q.ly);
+    ends.forEach((e2,i) => { if (i && e2.ly - ends[i-1].ly < 12) e2.ly = ends[i-1].ly + 12; });
+    const lines = ser.map(([yy,t,rs2]) => { const last = rs2[rs2.length-1], ly = ends.find(e2 => e2.yy === yy).ly;
+      return `<path d="${rs2.map((r,i) => (i?'L':'M') + x(r.day_of_month).toFixed(1) + ',' + y(r[mk]).toFixed(1)).join('')}" fill="none" stroke="${col(yy)}" stroke-width="${yy===focus?2.6:1.6}" ${yy===prevYm?'stroke-dasharray="5 3"':''}/>
+        <text x="${x(last.day_of_month)+5}" y="${ly}" font-size="10" font-weight="800" fill="${col(yy)}">${t}</text>`; }).join('');
+    const hits = Array.from({length:31}, (_,i) => i+1).map(d => { const v = ser.map(([yy,t,rs2]) => [t, (rs2.find(r => r.day_of_month === d) || {})[mk]]);
+      return `<rect x="${x(d)-4}" y="${pt}" width="8" height="${H-pt-pb}" fill="transparent" data-tip="<b>Day ${d} of the month</b><br>${v.map(([t,vv]) => `${t}: ${fm(vv)}`).join('<br>')}"/>`; }).join('');
+    const ticks = [1,8,15,22,29].map(d => `<text x="${x(d)}" y="${H-5}" font-size="9.5" fill="${T('sub')}" text-anchor="middle">${d}</text>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${grid}${lines}${ticks}${hits}</svg>`; };
+
+  const wd = P().weekday.filter(w => w.day_short);
+  const mxi = Math.max(1.3, ...wd.map(w => w.ix || 0));
+  const dowSvg = (W, H) => { const pl = 4, pr = 4, pt = 18, pb = 20, n = wd.length, bw = (W - pl - pr) / n;
+    const y = v => pt + (1 - v / mxi) * (H - pt - pb);
+    const bars = wd.map((w,i) => { const best = w.day_name === k['Best Weekday'];
+      return `<g data-tip="<b>${w.day_name}</b> · ${w.days} days<br>${fUsd(w.adr)} revenue per day<br>${(w.ix||0).toFixed(2)}× a typical day · conversion ${fPct(w.cr)}">
+      <rect x="${pl+i*bw+bw*.2}" y="${y(w.ix||0)}" width="${bw*.6}" height="${H-pb-y(w.ix||0)}" rx="5" fill="${w.is_weekend?T('muted'):best?T('acc'):T('acc2')}" fill-opacity="${w.is_weekend?.45:1}"/>
+      <text x="${pl+i*bw+bw/2}" y="${y(w.ix||0)-5}" font-size="9.5" font-weight="800" text-anchor="middle" fill="${best?T('acc'):T('ink')}">${(w.ix||0).toFixed(2)}×</text>
+      <text x="${pl+i*bw+bw/2}" y="${H-5}" font-size="10" font-weight="600" text-anchor="middle" fill="${T('sub')}">${w.day_short}</text></g>`; }).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><line x1="${pl}" x2="${W-pr}" y1="${y(1)}" y2="${y(1)}" stroke="${T('ink')}" stroke-dasharray="3 3" stroke-opacity=".35"/>${bars}</svg>`; };
+
+  const mtd = k['Revenue MTD vs PMTD %'];
+  return `<div class="body" style="grid-template-columns:1.4fr 1fr .9fr;grid-template-rows:168px 1fr">
+    <div class="card" style="grid-column:1;grid-row:1">
+      <div class="ct"><div><h3>${m==='r'?'Revenue':'Sessions'} · 7 vs 28-day average</h3></div>
+      <div style="display:flex;gap:16px;align-items:center">
+      <div class="tog" data-tog="p6metric">${[['r','Revenue'],['s','Sessions']].map(([v,t]) => `<button data-v="${v}" class="${m===v?'on':''}">${t}</button>`).join('')}</div></div></div>
+      <div class="fill" style="margin-top:8px">${slot('roll', rollSvg)}</div>
+      ${tag('Native combo chart · Date[date] · columns [Revenue] · lines [Revenue 7D Avg], [Revenue 28D Avg] · field parameter for Revenue / Sessions')}
+    </div>
+    <div class="card" style="grid-column:3;grid-row:1">
+      <div class="ct"><div><h3>Day-of-week pattern</h3></div></div>
+      <div class="fill">${slot('dow', dowSvg)}</div>
+      <div class="foot" style="margin-top:4px">Weekends: ${fPct(k['Weekend Day Share'],0)} of days, ${fPct(k['Weekend Revenue Share'],0)} of revenue.</div>
+      ${tag('Native column chart · Date[day_short] × [Weekday Revenue Index] · reference line at 1.0')}
+    </div>
+    <div class="card" style="grid-column:1 / span 3;grid-row:2">
+      <div class="ct"><div><h3>Rolling windows</h3><p>Last 7, 14 and 28 days up to ${sd(re)} vs the window just before</p></div><span class="pill acc">ENDS ${sd(re).toUpperCase()}</span></div>
+      <div class="fill" style="margin-top:8px">${rollTable()}</div>
+      ${tag('HTML Content · [06 · 003 Rolling Table HTML] · [<metric> L7D / P7D / L7D Δ%] … [L28D] measures in Base\\Time\\Rolling Windows')}
+    </div>
+    <div class="card" style="grid-column:2;grid-row:1">
+      <div class="ct"><div><h3>Month-to-date pacing</h3></div></div>
+      <div class="fill" style="margin-top:8px">${slot('pace', paceSvg)}</div>
+      <div class="foot" style="margin-top:6px">${nz(mtd) ? 'November has no October to pace against.' : `${mname(focus)} is <b style="color:${mtd>=0?T('good'):T('bad')}">${mtd>=0?'+':'−'}${fPct(Math.abs(mtd),0)}</b> on revenue ${esc(k['MTD Label'])}.`}</div>
+      ${tag('Native line chart · Date[day_of_month] × [Revenue MTD] · legend Date[month_short]')}
+    </div></div>`;
+}
+
+/* ---------------- render ---------------- */
+const RENDER = [page0, page1, page2, page3, page4, page5, page6];
+const FALLBACK = {2: 'Source table', 3: 'Landing pages', 5: 'Products'};
+function render(){
+  VIEW = buildView();
+  const pg = PAGES[S.page];
+  canvas.classList.toggle('collapsed', !S.nav);
+  document.getElementById('nav').innerHTML = PAGES.map((p,i) => `<button class="${i===S.page?'on':''}" data-i="${i}" title="${p.nav}">${svg(p.ic)}<span class="lbl">${p.nav}</span></button>`).join('');
+  document.getElementById('main').style.display = pg.full ? 'none' : 'flex';
+  if (!pg.full){
+    const fb = VIEW.custom && FALLBACK[S.page] ? ` · <span class="note">${FALLBACK[S.page]} uses ${D[VIEW.base].kpi['Period Label']}</span>` : '';
+    document.getElementById('hdr').innerHTML = `<div class="hl"><div class="ht"><span class="hn">${pg.num}</span><h1>${pg.nav}</h1></div><p class="hs">${esc(K(pg.num + ' Headline'))}</p></div>
+      <div class="hr"><button class="pick" id="pickBtn">${svg('cal')}<span>${rangeLabel(S.range.s, S.range.e)}</span>${svg('chev','chev')}</button>
+      <div class="cmp">${nDays(S.range.s, S.range.e)} days · compared <b>${esc(K('PP Label').replace(/^vs /,'with '))}</b>${fb}</div></div>`;
+    document.getElementById('pickBtn').onclick = e => { e.stopPropagation(); document.getElementById('pop').classList.contains('on') ? closePicker() : openPicker(); };
+    renderKpis(pg);
+  }
+  const pages = document.getElementById('pages');
+  pages.innerHTML = pg.full ? '' : RENDER[S.page]();
+  const cv = document.getElementById('cover');
+  if (pg.full) {
+    if (!cv.classList.contains('on')) { cv.innerHTML = cover(); cv.classList.add('on'); }
+    cv.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { S.page = +b.dataset.go; hideTip(); render(); });
+    document.getElementById('cvHow').onclick = () => document.getElementById('howto').classList.add('on');
+  } else { cv.classList.remove('on'); cv.innerHTML = ''; }
+  canvas.classList.toggle('build', S.build);
+  document.getElementById('btnBuild').classList.toggle('on', S.build);
+  fillSlots(pages); bindTips(canvas); bindSort(pages);
+  document.querySelectorAll('#nav button').forEach(b => b.onclick = () => { S.page = +b.dataset.i; hideTip(); closePicker(); render(); });
+  pages.querySelectorAll('[data-tog]').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => { S[g.dataset.tog] = b.dataset.v; render(); }));
+  pages.querySelectorAll('[data-chip]').forEach(g => g.querySelectorAll('button').forEach(b => b.onclick = () => { S[g.dataset.chip] = b.dataset.v; render(); }));
+  const [t, steps] = HOWTO[S.page];
+  document.getElementById('howBody').innerHTML = `<div class="eyebrow">HOW TO READ · ${t.toUpperCase()}</div><h4 style="margin-top:8px">${pg.q}</h4><ol>${steps.map(([a,b],i) => `<li><i>${i+1}</i><div><b>${a}.</b> ${b}</div></li>`).join('')}</ol>
+    <div class="foot" style="margin-top:18px">Use the date picker in the header for any range from Nov 1 to Jan 31. Headline, KPI cards and insight cards are DAX measures rendered by the HTML Content visual; charts are native Power BI visuals. Toggle <b>Build notes</b> to see the mapping.</div>`;
+  try { localStorage.setItem('ga4proto4', JSON.stringify({page: S.page, key: S.key, range: S.range, nav: S.nav})); } catch(e) {}
+}
+document.getElementById('btnHow').onclick = () => document.getElementById('howto').classList.add('on');
+document.getElementById('howX').onclick = () => document.getElementById('howto').classList.remove('on');
+document.getElementById('howto').onclick = e => { if (e.target.id === 'howto') e.currentTarget.classList.remove('on'); };
+document.getElementById('btnBuild').onclick = () => { S.build = !S.build; render(); };
+document.getElementById('btnCol').onclick = () => { S.nav = !S.nav; canvas.classList.toggle('collapsed', !S.nav); hideTip(); setTimeout(render, 270); };
+document.getElementById('pop').onclick = e => e.stopPropagation();
+canvas.addEventListener('click', () => closePicker());
+document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; if (e.key >= '0' && e.key <= '6') { S.page = +e.key; render(); } if (e.key === 'Escape') { document.getElementById('howto').classList.remove('on'); closePicker(); } if (e.key === '[') { S.nav = !S.nav; render(); } });
+function fit(){ scale = Math.min((innerWidth - 24) / 1280, (innerHeight - 24) / 720); canvas.style.transform = `scale(${scale})`; }
+addEventListener('resize', fit); fit();
+try { const s = JSON.parse(localStorage.getItem('ga4proto4') || '{}'); if (s.range) Object.assign(S, s); } catch(e) {}
+const hp = location.hash.match(/p(\d)/); if (hp) S.page = +hp[1];
+render();
+</script>
+</body>
+</html>
