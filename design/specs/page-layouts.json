@@ -1,0 +1,1021 @@
+{
+  "canvas": {
+    "width": 1600,
+    "height": 900,
+    "background": "#F5F4FA"
+  },
+  "header": {
+    "x": 128,
+    "y": 25,
+    "width": 1432,
+    "height": 70
+  },
+  "filters": {
+    "x": 128,
+    "y": 112,
+    "width": 1432,
+    "height": 40
+  },
+  "footer": {
+    "x": 128,
+    "y": 858,
+    "width": 1432,
+    "height": 24
+  },
+  "navigation": [
+    {
+      "page": "welcome",
+      "label": "Welcome",
+      "icon": "house-door",
+      "rect": {
+        "x": 12,
+        "y": 130,
+        "width": 64,
+        "height": 64
+      }
+    },
+    {
+      "page": "overview",
+      "label": "Overview",
+      "icon": "grid-1x2",
+      "rect": {
+        "x": 12,
+        "y": 215,
+        "width": 64,
+        "height": 64
+      }
+    },
+    {
+      "page": "acquisition",
+      "label": "Acquisition",
+      "icon": "diagram-3",
+      "rect": {
+        "x": 12,
+        "y": 300,
+        "width": 64,
+        "height": 64
+      }
+    },
+    {
+      "page": "content",
+      "label": "Content",
+      "icon": "file-earmark-bar-graph",
+      "rect": {
+        "x": 12,
+        "y": 385,
+        "width": 64,
+        "height": 64
+      }
+    },
+    {
+      "page": "funnel",
+      "label": "Funnel",
+      "icon": "funnel",
+      "rect": {
+        "x": 12,
+        "y": 470,
+        "width": 64,
+        "height": 64
+      }
+    }
+  ],
+  "pages": {
+    "overview": {
+      "title": "Executive overview",
+      "cards": [
+        {
+          "id": "kpi-0",
+          "title": "Revenue",
+          "kind": "kpi",
+          "rect": {
+            "x": 128.0,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 146.0,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Revenue"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-1",
+          "title": "Sessions",
+          "kind": "kpi",
+          "rect": {
+            "x": 418.4,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 436.4,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-2",
+          "title": "Conversion Rate",
+          "kind": "kpi",
+          "rect": {
+            "x": 708.8,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 726.8,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Conversion Rate"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-3",
+          "title": "Purchases",
+          "kind": "kpi",
+          "rect": {
+            "x": 999.2,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 1017.2,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Purchases"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-4",
+          "title": "Revenue per Session",
+          "kind": "kpi",
+          "rect": {
+            "x": 1289.6,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 1307.6,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Revenue per Session"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "trend",
+          "title": "Revenue over time",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 316,
+            "width": 924,
+            "height": 250
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 360,
+            "width": 888,
+            "height": 190
+          },
+          "measures": [
+            "Revenue",
+            "Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "channel-mix",
+          "title": "Revenue by channel",
+          "kind": "visual",
+          "rect": {
+            "x": 1072,
+            "y": 316,
+            "width": 488,
+            "height": 250
+          },
+          "visualRect": {
+            "x": 1090,
+            "y": 360,
+            "width": 452,
+            "height": 190
+          },
+          "measures": [
+            "Revenue"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "channel-table",
+          "title": "Channel performance",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 586,
+            "width": 924,
+            "height": 250
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 630,
+            "width": 888,
+            "height": 190
+          },
+          "measures": [
+            "Revenue",
+            "Sessions",
+            "Conversion Rate",
+            "Purchases",
+            "Revenue per Session"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "device-mix",
+          "title": "Sessions by device",
+          "kind": "visual",
+          "rect": {
+            "x": 1072,
+            "y": 586,
+            "width": 488,
+            "height": 250
+          },
+          "visualRect": {
+            "x": 1090,
+            "y": 630,
+            "width": 452,
+            "height": 190
+          },
+          "measures": [
+            "Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        }
+      ]
+    },
+    "acquisition": {
+      "title": "Acquisition",
+      "cards": [
+        {
+          "id": "kpi-0",
+          "title": "Revenue",
+          "kind": "kpi",
+          "rect": {
+            "x": 128.0,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 146.0,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Revenue"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-1",
+          "title": "Sessions",
+          "kind": "kpi",
+          "rect": {
+            "x": 418.4,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 436.4,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-2",
+          "title": "Conversion Rate",
+          "kind": "kpi",
+          "rect": {
+            "x": 708.8,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 726.8,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Conversion Rate"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-3",
+          "title": "Purchases",
+          "kind": "kpi",
+          "rect": {
+            "x": 999.2,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 1017.2,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Purchases"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-4",
+          "title": "Revenue per Session",
+          "kind": "kpi",
+          "rect": {
+            "x": 1289.6,
+            "y": 168,
+            "width": 270.4,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 1307.6,
+            "y": 180,
+            "width": 234.39999999999998,
+            "height": 104
+          },
+          "measures": [
+            "Revenue per Session"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "source-matrix",
+          "title": "Which sources bring value?",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 316,
+            "width": 924,
+            "height": 280
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 360,
+            "width": 888,
+            "height": 220
+          },
+          "measures": [
+            "Revenue",
+            "Sessions",
+            "Conversion Rate",
+            "Purchases",
+            "Revenue per Session",
+            "Engagement Rate"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "channel-rank",
+          "title": "Channel ranking",
+          "kind": "visual",
+          "rect": {
+            "x": 1072,
+            "y": 316,
+            "width": 488,
+            "height": 280
+          },
+          "visualRect": {
+            "x": 1090,
+            "y": 360,
+            "width": 452,
+            "height": 220
+          },
+          "measures": [
+            "Revenue",
+            "Revenue per Session"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "geo-device",
+          "title": "Revenue by country & device",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 616,
+            "width": 706,
+            "height": 220
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 660,
+            "width": 670,
+            "height": 160
+          },
+          "measures": [
+            "Revenue"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "device-conversion",
+          "title": "Device conversion",
+          "kind": "visual",
+          "rect": {
+            "x": 854,
+            "y": 616,
+            "width": 706,
+            "height": 220
+          },
+          "visualRect": {
+            "x": 872,
+            "y": 660,
+            "width": 670,
+            "height": 160
+          },
+          "measures": [
+            "Conversion Rate"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        }
+      ]
+    },
+    "content": {
+      "title": "Content & landing pages",
+      "cards": [
+        {
+          "id": "kpi-0",
+          "title": "Sessions",
+          "kind": "kpi",
+          "rect": {
+            "x": 128.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 146.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Page Type"
+          ]
+        },
+        {
+          "id": "kpi-1",
+          "title": "Engagement Rate",
+          "kind": "kpi",
+          "rect": {
+            "x": 491.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 509.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "Engagement Rate"
+          ],
+          "filterScope": [
+            "Date",
+            "Page Type"
+          ]
+        },
+        {
+          "id": "kpi-2",
+          "title": "Conversion Rate",
+          "kind": "kpi",
+          "rect": {
+            "x": 854.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 872.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "Conversion Rate"
+          ],
+          "filterScope": [
+            "Date",
+            "Page Type"
+          ]
+        },
+        {
+          "id": "kpi-3",
+          "title": "Revenue per Session",
+          "kind": "kpi",
+          "rect": {
+            "x": 1217.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 1235.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "Revenue per Session"
+          ],
+          "filterScope": [
+            "Date",
+            "Page Type"
+          ]
+        },
+        {
+          "id": "traffic-value",
+          "title": "Traffic quality by landing page",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 316,
+            "width": 924,
+            "height": 230
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 360,
+            "width": 888,
+            "height": 170
+          },
+          "measures": [
+            "Sessions",
+            "Revenue per Session"
+          ],
+          "filterScope": [
+            "Date",
+            "Page Type"
+          ]
+        },
+        {
+          "id": "type-revenue",
+          "title": "Revenue by page type",
+          "kind": "visual",
+          "rect": {
+            "x": 1072,
+            "y": 316,
+            "width": 488,
+            "height": 230
+          },
+          "visualRect": {
+            "x": 1090,
+            "y": 360,
+            "width": 452,
+            "height": 170
+          },
+          "measures": [
+            "Revenue"
+          ],
+          "filterScope": [
+            "Date",
+            "Page Type"
+          ]
+        },
+        {
+          "id": "landing-table",
+          "title": "Landing-page performance",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 566,
+            "width": 1432,
+            "height": 270
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 610,
+            "width": 1396,
+            "height": 210
+          },
+          "measures": [
+            "Sessions",
+            "Engagement Rate",
+            "Conversion Rate",
+            "Revenue",
+            "Revenue per Session"
+          ],
+          "filterScope": [
+            "Date",
+            "Page Type"
+          ]
+        }
+      ]
+    },
+    "funnel": {
+      "title": "Funnel & products",
+      "cards": [
+        {
+          "id": "kpi-0",
+          "title": "View Item Sessions",
+          "kind": "kpi",
+          "rect": {
+            "x": 128.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 146.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "View Item Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-1",
+          "title": "Begin Checkout Sessions",
+          "kind": "kpi",
+          "rect": {
+            "x": 491.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 509.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "Begin Checkout Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-2",
+          "title": "Purchase Sessions",
+          "kind": "kpi",
+          "rect": {
+            "x": 854.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 872.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "Purchase Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "kpi-3",
+          "title": "Checkout to Purchase Ratio",
+          "kind": "kpi",
+          "rect": {
+            "x": 1217.0,
+            "y": 168,
+            "width": 343.0,
+            "height": 128
+          },
+          "visualRect": {
+            "x": 1235.0,
+            "y": 180,
+            "width": 307.0,
+            "height": 104
+          },
+          "measures": [
+            "Checkout to Purchase Ratio"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "event-reach",
+          "title": "Shopping event reach",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 316,
+            "width": 706,
+            "height": 245
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 360,
+            "width": 670,
+            "height": 185
+          },
+          "measures": [
+            "View Item Sessions",
+            "Add to Cart Sessions",
+            "Begin Checkout Sessions",
+            "Add Payment Info Sessions",
+            "Purchase Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "device-event-reach",
+          "title": "Event reach by device",
+          "kind": "visual",
+          "rect": {
+            "x": 854,
+            "y": 316,
+            "width": 706,
+            "height": 245
+          },
+          "visualRect": {
+            "x": 872,
+            "y": 360,
+            "width": 670,
+            "height": 185
+          },
+          "measures": [
+            "View Item Sessions",
+            "Add to Cart Sessions",
+            "Begin Checkout Sessions",
+            "Purchase Sessions",
+            "Sessions"
+          ],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "products",
+          "title": "Product performance",
+          "kind": "visual",
+          "rect": {
+            "x": 128,
+            "y": 581,
+            "width": 1432,
+            "height": 255
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 625,
+            "width": 1396,
+            "height": 195
+          },
+          "measures": [
+            "Item Views",
+            "Add to Carts",
+            "Add-to-Cart Rate",
+            "Item Revenue"
+          ],
+          "filterScope": [
+            "Date",
+            "Category"
+          ]
+        }
+      ]
+    },
+    "welcome": {
+      "title": "Welcome",
+      "cards": [
+        {
+          "id": "chapter-1",
+          "title": "The big picture",
+          "kind": "chapter",
+          "rect": {
+            "x": 128,
+            "y": 630,
+            "width": 343,
+            "height": 206
+          },
+          "visualRect": {
+            "x": 146,
+            "y": 674,
+            "width": 307,
+            "height": 146
+          },
+          "measures": [],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "chapter-2",
+          "title": "Where visits begin",
+          "kind": "chapter",
+          "rect": {
+            "x": 491,
+            "y": 630,
+            "width": 343,
+            "height": 206
+          },
+          "visualRect": {
+            "x": 509,
+            "y": 674,
+            "width": 307,
+            "height": 146
+          },
+          "measures": [],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "chapter-3",
+          "title": "What earns attention",
+          "kind": "chapter",
+          "rect": {
+            "x": 854,
+            "y": 630,
+            "width": 343,
+            "height": 206
+          },
+          "visualRect": {
+            "x": 872,
+            "y": 674,
+            "width": 307,
+            "height": 146
+          },
+          "measures": [],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        },
+        {
+          "id": "chapter-4",
+          "title": "The path to purchase",
+          "kind": "chapter",
+          "rect": {
+            "x": 1217,
+            "y": 630,
+            "width": 343,
+            "height": 206
+          },
+          "visualRect": {
+            "x": 1235,
+            "y": 674,
+            "width": 307,
+            "height": 146
+          },
+          "measures": [],
+          "filterScope": [
+            "Date",
+            "Channel",
+            "Device"
+          ]
+        }
+      ]
+    }
+  },
+  "note": "Coordinates in pixels. Card title remains live native text; PNG contains card surfaces and decorative rail icons only."
+}

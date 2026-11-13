@@ -1,0 +1,216 @@
+{
+  "source_commit": "7fbccf0e75da59896267fce0fa213fd31c8cb026",
+  "source": "notebooks/nb_semantic_model_ga4.ipynb",
+  "model": "GA4 Ecommerce",
+  "existing_measures": [
+    {
+      "name": "Sessions",
+      "format": "#,##0",
+      "description": "Count of sessions from gold_ga4_sessions (one row per session). Do not SUM the pre-aggregated sessions columns on Daily KPIs or Landing Pages.",
+      "expr": "COUNTROWS('Sessions')"
+    },
+    {
+      "name": "Users",
+      "format": "#,##0",
+      "description": "Distinct user_pseudo_id from gold_ga4_sessions. Users do not add up across channel, device, or page breakdowns.",
+      "expr": "DISTINCTCOUNT('Sessions'[user_pseudo_id])"
+    },
+    {
+      "name": "New Users",
+      "format": "#,##0",
+      "description": "Distinct users whose first session (is_new_user) is in the current filter context.",
+      "expr": "CALCULATE(\n    DISTINCTCOUNT('Sessions'[user_pseudo_id]),\n    'Sessions'[is_new_user] = TRUE()\n)"
+    },
+    {
+      "name": "Engaged Sessions",
+      "format": "#,##0",
+      "description": "Sessions flagged engaged (GA4 session_engaged = 1) in gold_ga4_sessions.",
+      "expr": "CALCULATE(\n    [Sessions],\n    'Sessions'[engaged] = TRUE()\n)"
+    },
+    {
+      "name": "Engagement Rate",
+      "format": "0.00%",
+      "description": "Engaged Sessions divided by Sessions. This is the GA4 engagement rate, not 1 minus Universal Analytics bounce rate. Computed with DIVIDE; do not average the engagement_rate column.",
+      "expr": "DIVIDE([Engaged Sessions], [Sessions])"
+    },
+    {
+      "name": "Purchases",
+      "format": "#,##0",
+      "description": "Count of purchase events in gold_ga4_sessions (SUM of purchases). A session can have more than one purchase.",
+      "expr": "SUM('Sessions'[purchases])"
+    },
+    {
+      "name": "Revenue",
+      "format": "$#,##0",
+      "description": "Sum of purchase revenue in USD from gold_ga4_sessions.",
+      "expr": "SUM('Sessions'[revenue])"
+    },
+    {
+      "name": "Conversion Rate",
+      "format": "0.00%",
+      "description": "Share of sessions with at least one purchase. Computed with DIVIDE; do not average the conversion_rate column.",
+      "expr": "DIVIDE(\n    CALCULATE([Sessions], 'Sessions'[purchases] > 0),\n    [Sessions]\n)"
+    },
+    {
+      "name": "AOV",
+      "format": "$#,##0.00",
+      "description": "Average order value: Revenue divided by Purchases (purchase events). Computed with DIVIDE; do not average the aov column.",
+      "expr": "DIVIDE([Revenue], [Purchases])"
+    },
+    {
+      "name": "Revenue per Session",
+      "format": "$#,##0.00",
+      "description": "Revenue divided by Sessions. Computed with DIVIDE; do not average the revenue_per_session column.",
+      "expr": "DIVIDE([Revenue], [Sessions])"
+    },
+    {
+      "name": "Revenue Share of Top Channel",
+      "format": "0.00%",
+      "description": "Share of Revenue that comes from the single largest channel_group in the current selection (ALLSELECTED on Channel). A concentration-risk KPI.",
+      "expr": "VAR TotalRevenue =\n    CALCULATE([Revenue], ALLSELECTED('Channel'[channel_group]))\nVAR TopChannelRevenue =\n    MAXX(\n        ALLSELECTED('Channel'[channel_group]),\n        [Revenue]\n    )\nRETURN\nDIVIDE(TopChannelRevenue, TotalRevenue)"
+    },
+    {
+      "name": "Pageviews",
+      "format": "#,##0",
+      "description": "Sum of pageviews from gold_ga4_page_sessions (page_view events with a page_location).",
+      "expr": "SUM('Page Sessions'[pageviews])"
+    },
+    {
+      "name": "View Item Sessions",
+      "format": "#,##0",
+      "description": "Sessions that fired view_item, summed from gold_ga4_funnel_daily (additive at date \u00d7 channel \u00d7 device).",
+      "expr": "SUM('Funnel Daily'[view_item_sessions])"
+    },
+    {
+      "name": "Add to Cart Sessions",
+      "format": "#,##0",
+      "description": "Sessions that fired add_to_cart, summed from gold_ga4_funnel_daily.",
+      "expr": "SUM('Funnel Daily'[add_to_cart_sessions])"
+    },
+    {
+      "name": "Begin Checkout Sessions",
+      "format": "#,##0",
+      "description": "Sessions that fired begin_checkout, summed from gold_ga4_funnel_daily.",
+      "expr": "SUM('Funnel Daily'[begin_checkout_sessions])"
+    },
+    {
+      "name": "Add Payment Info Sessions",
+      "format": "#,##0",
+      "description": "Sessions that fired add_payment_info, summed from gold_ga4_funnel_daily.",
+      "expr": "SUM('Funnel Daily'[add_payment_info_sessions])"
+    },
+    {
+      "name": "Purchase Sessions",
+      "format": "#,##0",
+      "description": "Sessions that fired purchase, summed from gold_ga4_funnel_daily. Distinct from Purchases, which counts purchase events.",
+      "expr": "SUM('Funnel Daily'[purchase_sessions])"
+    },
+    {
+      "name": "View Item to Cart Rate",
+      "format": "0.00%",
+      "description": "Add to Cart Sessions divided by View Item Sessions.",
+      "expr": "DIVIDE([Add to Cart Sessions], [View Item Sessions])"
+    },
+    {
+      "name": "Cart to Checkout Rate",
+      "format": "0.00%",
+      "description": "Begin Checkout Sessions divided by Add to Cart Sessions.",
+      "expr": "DIVIDE([Begin Checkout Sessions], [Add to Cart Sessions])"
+    },
+    {
+      "name": "Checkout to Payment Rate",
+      "format": "0.00%",
+      "description": "Add Payment Info Sessions divided by Begin Checkout Sessions.",
+      "expr": "DIVIDE([Add Payment Info Sessions], [Begin Checkout Sessions])"
+    },
+    {
+      "name": "Payment to Purchase Rate",
+      "format": "0.00%",
+      "description": "Purchase Sessions divided by Add Payment Info Sessions.",
+      "expr": "DIVIDE([Purchase Sessions], [Add Payment Info Sessions])"
+    },
+    {
+      "name": "View Item to Purchase Rate",
+      "format": "0.00%",
+      "description": "Purchase Sessions divided by View Item Sessions (overall funnel conversion).",
+      "expr": "DIVIDE([Purchase Sessions], [View Item Sessions])"
+    },
+    {
+      "name": "Item Views",
+      "format": "#,##0",
+      "description": "Item-level view_item counts from gold_ga4_items_daily (related-item noise already removed in gold).",
+      "expr": "SUM('Items Daily'[item_views])"
+    },
+    {
+      "name": "Add to Carts",
+      "format": "#,##0",
+      "description": "Item-level add_to_cart counts from gold_ga4_items_daily.",
+      "expr": "SUM('Items Daily'[add_to_carts])"
+    },
+    {
+      "name": "Item Revenue",
+      "format": "$#,##0",
+      "description": "Item-level purchase revenue from gold_ga4_items_daily. May differ slightly from Revenue, which is session purchase_revenue_in_usd.",
+      "expr": "SUM('Items Daily'[item_revenue])"
+    },
+    {
+      "name": "Add-to-Cart Rate",
+      "format": "0.00%",
+      "description": "Add to Carts divided by Item Views. Computed with DIVIDE.",
+      "expr": "DIVIDE([Add to Carts], [Item Views])"
+    }
+  ],
+  "additional_measures_required": [
+    {
+      "name": "Previous Calendar Month Revenue",
+      "status": "design specification only; not installed",
+      "expression": "CALCULATE([Revenue], PREVIOUSMONTH('Date'[date]))"
+    },
+    {
+      "name": "Revenue MoM %",
+      "status": "design specification only; not installed",
+      "expression": "DIVIDE([Revenue] - [Previous Calendar Month Revenue], [Previous Calendar Month Revenue])"
+    },
+    {
+      "name": "Checkout to Purchase Ratio",
+      "status": "design specification only; not installed",
+      "expression": "DIVIDE([Purchase Sessions], [Begin Checkout Sessions])",
+      "warning": "Independent event count ratio; not ordered conversion."
+    }
+  ],
+  "additional_series_required": [
+    "Device event reach percentages = each event session measure / [Sessions], evaluated per Device."
+  ],
+  "scopes": {
+    "overview": [
+      "Date",
+      "Channel",
+      "Device"
+    ],
+    "acquisition": [
+      "Date",
+      "Channel",
+      "Device"
+    ],
+    "content": [
+      "Date",
+      "Page Type"
+    ],
+    "funnel": [
+      "Date",
+      "Channel",
+      "Device"
+    ],
+    "products": [
+      "Date",
+      "Items Daily.item_category"
+    ]
+  },
+  "production_cautions": [
+    "Additional month-over-month comparisons for Sessions, Conversion Rate, Purchases and Revenue per Session still need implementation.",
+    "Guard comparisons to exactly one complete calendar month; November and full-window return BLANK.",
+    "Category uses the verified Items Daily[item_category] field from the gold schema.",
+    "HTML country fixture is illustrative; native use Sessions[country].",
+    "Product conversion is not a modeled measure; show item views, add-to-cart rate and item revenue."
+  ]
+}

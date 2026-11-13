@@ -1,0 +1,36 @@
+{
+  "name": "GA4 Ecommerce · Lavender",
+  "dataColors": ["#6550D9", "#9887EB", "#B8A9ED", "#423293", "#628FE8", "#D9D3ED"],
+  "background": "#FFFFFF",
+  "foreground": "#252437",
+  "tableAccent": "#6550D9",
+  "good": "#1B8269",
+  "neutral": "#747284",
+  "bad": "#BD5367",
+  "maximum": "#6550D9",
+  "center": "#ECE8FC",
+  "minimum": "#F5F4FA",
+  "textClasses": {
+    "title": { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#252437" },
+    "header": { "fontFace": "Segoe UI Semibold", "fontSize": 11, "color": "#252437" },
+    "label": { "fontFace": "Segoe UI", "fontSize": 10, "color": "#747284" },
+    "callout": { "fontFace": "Segoe UI Semibold", "fontSize": 28, "color": "#252437" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": false, "transparency": 100 }],
+        "border": [{ "show": false }],
+        "dropShadow": [{ "show": false }],
+        "title": [{ "fontColor": { "solid": { "color": "#252437" } }, "fontFamily": "Segoe UI Semibold", "fontSize": 12 }],
+        "visualTooltip": [{ "background": { "solid": { "color": "#30254D" } }, "titleFontColor": { "solid": { "color": "#FFFFFF" } }, "valueFontColor": { "solid": { "color": "#FFFFFF" } } }]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#F5F4FA" } }, "transparency": 0 }],
+        "outspace": [{ "color": { "solid": { "color": "#F5F4FA" } } }]
+      }
+    }
+  }
+}

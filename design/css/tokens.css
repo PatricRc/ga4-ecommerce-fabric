@@ -1,0 +1,5 @@
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:400;font-display:swap;src:url('../assets/fonts/dm-sans-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:500;font-display:swap;src:url('../assets/fonts/dm-sans-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:600;font-display:swap;src:url('../assets/fonts/dm-sans-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:700;font-display:swap;src:url('../assets/fonts/dm-sans-latin-700-normal.woff2') format('woff2')}
+:root{--canvas:#f5f4fa;--surface:#ffffff;--surface-alt:#efedf8;--ink:#252437;--muted:#747284;--border:#e9e7f1;--primary:#6550d9;--primary-deep:#423293;--primary-soft:#ece8fc;--series-2:#9887eb;--series-3:#b8a9ed;--series-4:#dad4f8;--blue:#628fe8;--green:#1b8269;--green-soft:#eaf6f0;--red:#bd5367;--red-soft:#fbeef1;--radius:16px;--gap:20px;--shadow:0 3px 16px #2e225306;--font:'DM Sans','Segoe UI',sans-serif;--rail:88px}

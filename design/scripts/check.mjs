@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {readFile,readdir,stat} from 'node:fs/promises';
+import {resolve} from 'node:path';
+import {filtered,metrics,grouped,comparison,sum,channels} from '../js/data.js';
+const root=resolve(import.meta.dirname,'..');
+const read=async p=>JSON.parse(await readFile(resolve(root,p),'utf8'));
+const fixture=await read('data/preview-fixture.json');
+assert.equal(fixture.metadata.classification,'synthetic-design-fixture');
+const m=metrics(fixture.sessions);
+for(const [key,expected] of Object.entries({sessions:360129,revenue:362165,pageviews:1350428,purchase_sessions:4848,begin_checkout:11106}))assert.ok(Math.abs(m[key]-expected)<.001,`${key} fixture checkpoint`);
+assert.ok(m.purchases>m.purchase_sessions,'Purchase events must be distinct from purchasing sessions in the fixture');
+assert.equal(metrics([]).cvr,null);assert.equal(m.cvr,4848/360129);assert.equal(m.rps,m.revenue/m.sessions);assert.equal(m.aov,m.revenue/m.purchases);
+for(const r of fixture.sessions){assert.ok(r.sessions>=r.purchase_sessions);assert.ok(r.sessions>=r.engaged);assert.ok(r.revenue>=0);assert.ok(channels.includes(r.channel));}
+const base={period:'jan',channel:'Direct',device:'mobile',type:'',search:'',category:''};
+const subset=filtered(fixture.sessions,base);assert.ok(subset.length>0&&subset.length<fixture.sessions.length);
+assert.ok(subset.every(r=>r.date.startsWith('2021-01')&&r.channel==='Direct'&&r.device==='mobile'));
+assert.ok(comparison(fixture,base).sessions>0);assert.equal(comparison(fixture,{...base,period:'nov'}),null);assert.equal(comparison(fixture,{...base,period:'all'}),null);
+const content=filtered(fixture.sessions,{...base,type:'product'},{session:false,content:true});
+assert.ok(content.every(r=>r.page_type==='product'));assert.ok(new Set(content.map(r=>r.device)).size>1,'Content ignores unsupported Device scope');
+const itemA=filtered(fixture.items,base,{session:false,product:true});
+const itemB=filtered(fixture.items,{...base,channel:'Referral',device:'desktop'},{session:false,product:true});
+assert.deepEqual(itemA,itemB,'Products ignore unsupported Channel / Device filters');
+assert.equal(filtered(fixture.sessions,{...base,search:'no-such-path-123'},{session:false,content:true}).length,0);
+const groups=grouped(fixture.sessions,'channel');assert.equal(sum(groups,'sessions'),m.sessions);assert.ok(Math.abs(sum(groups,'revenue')-m.revenue)<.001);
+const layouts=await read('specs/page-layouts.json');
+for(const [page,spec] of Object.entries(layouts.pages))for(const c of spec.cards){const r=c.rect;assert.ok(r.x>=88&&r.y>=0&&r.x+r.width<=1600.2&&r.y+r.height<=900,`${page} ${c.id} within canvas`);const v=c.visualRect;assert.ok(v.x>=r.x&&v.y>=r.y&&v.x+v.width<=r.x+r.width&&v.y+v.height<=r.y+r.height);}
+const theme=await read('theme/powerbi-theme.json');assert.equal(theme.dataColors.length,6);assert.ok(theme.textClasses.callout);assert.ok(theme.visualStyles.page);for(const c of theme.dataColors)assert.match(c,/^#[0-9A-F]{6}$/);
+const bindings=await read('specs/model-bindings.json');assert.equal(bindings.existing_measures.length,26);
+for(const p of ['index.html','pages/overview.html','pages/acquisition.html','pages/content.html','pages/funnel.html','components/index.html','assets/vendor/chart.umd.min.js','assets/icons/fonts/bootstrap-icons.woff2','assets/fonts/dm-sans-latin-400-normal.woff2'])assert.ok((await stat(resolve(root,p))).size>0,p);
+console.log('PASS fixture totals, weighted metrics, period and filter scopes, product scope invariance, empty state, page geometry, theme structure, source measures and local assets.');
