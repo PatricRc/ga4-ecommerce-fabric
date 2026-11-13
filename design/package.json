@@ -1,0 +1,8 @@
+{
+  "name": "ga4-report-design-kit",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "dev": "vite --host 0.0.0.0", "check": "node scripts/check.mjs", "build": "node scripts/build.mjs" },
+  "dependencies": { "@fontsource/dm-sans": "5.2.5", "bootstrap-icons": "1.11.3", "chart.js": "4.4.8", "vite": "6.4.1" }
+}

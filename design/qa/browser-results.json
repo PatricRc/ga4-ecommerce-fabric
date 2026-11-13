@@ -1,0 +1,158 @@
+{
+  "testedAt": "2026-11-13T00:20:52.547Z",
+  "base": "http://localhost:4173",
+  "viewports": [
+    [
+      1600,
+      900
+    ],
+    [
+      390,
+      844
+    ],
+    [
+      768,
+      844
+    ]
+  ],
+  "checks": [
+    {
+      "name": "welcome desktop layout",
+      "result": "passed"
+    },
+    {
+      "name": "overview desktop layout",
+      "result": "passed"
+    },
+    {
+      "name": "acquisition desktop layout",
+      "result": "passed"
+    },
+    {
+      "name": "content desktop layout",
+      "result": "passed"
+    },
+    {
+      "name": "funnel desktop layout",
+      "result": "passed"
+    },
+    {
+      "name": "components desktop layout",
+      "result": "passed"
+    },
+    {
+      "name": "period filter recalculates revenue and prior-period delta",
+      "result": "passed"
+    },
+    {
+      "name": "trend chart switch",
+      "result": "passed"
+    },
+    {
+      "name": "navigation retains period filter",
+      "result": "passed"
+    },
+    {
+      "name": "channel ranking switch and human-readable geo labels",
+      "result": "passed"
+    },
+    {
+      "name": "keyboard detail dialog and Escape",
+      "result": "passed"
+    },
+    {
+      "name": "intersected channel/device filters and CSV export",
+      "result": "passed"
+    },
+    {
+      "name": "content excludes unsupported filters",
+      "result": "passed"
+    },
+    {
+      "name": "landing search, empty state, clear and sort",
+      "result": "passed"
+    },
+    {
+      "name": "products ignore channel/device and respect category",
+      "result": "passed"
+    },
+    {
+      "name": "local event reach device control",
+      "result": "passed"
+    },
+    {
+      "name": "scoped product CSV export",
+      "result": "passed"
+    },
+    {
+      "name": "source dialog",
+      "result": "passed"
+    },
+    {
+      "name": "reset clears global and local filters",
+      "result": "passed"
+    },
+    {
+      "name": "kit downloads and guide links",
+      "result": "passed"
+    },
+    {
+      "name": "welcome responsive at 390px",
+      "result": "passed"
+    },
+    {
+      "name": "overview responsive at 390px",
+      "result": "passed"
+    },
+    {
+      "name": "acquisition responsive at 390px",
+      "result": "passed"
+    },
+    {
+      "name": "content responsive at 390px",
+      "result": "passed"
+    },
+    {
+      "name": "funnel responsive at 390px",
+      "result": "passed"
+    },
+    {
+      "name": "components responsive at 390px",
+      "result": "passed"
+    },
+    {
+      "name": "mobile navigation works",
+      "result": "passed"
+    },
+    {
+      "name": "welcome responsive at 768px",
+      "result": "passed"
+    },
+    {
+      "name": "overview responsive at 768px",
+      "result": "passed"
+    },
+    {
+      "name": "acquisition responsive at 768px",
+      "result": "passed"
+    },
+    {
+      "name": "content responsive at 768px",
+      "result": "passed"
+    },
+    {
+      "name": "funnel responsive at 768px",
+      "result": "passed"
+    },
+    {
+      "name": "components responsive at 768px",
+      "result": "passed"
+    },
+    {
+      "name": "no browser console errors or failed local resources",
+      "result": "passed"
+    }
+  ],
+  "consoleErrors": [],
+  "failedRequests": []
+}

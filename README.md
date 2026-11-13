@@ -6,6 +6,8 @@ A Microsoft Fabric portfolio project: the public BigQuery [GA4 obfuscated sample
 
 > **Status: Bronze + gold tables ready. Semantic model notebook ready.** Import `nb_semantic_model_ga4.ipynb` into Fabric and run it after `nb_gold_ga4_dim_date`. The four report pages are not built yet.
 
+An [interactive HTML design kit](design/README.md) now defines the welcome page, four report pages, reusable components, CSS and design tokens, Power BI theme JSON, and 1600 × 900 canvas backgrounds. Run it locally before building the native report. Preview observations are synthetic; no Fabric connection or report deployment is included.
+
 ## The story in four pages
 
 | Page | Question | What it will show |
